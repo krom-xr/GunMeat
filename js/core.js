@@ -17,6 +17,7 @@ var animation = {
         return frames;
     },
     pushToRender: function(render_ob) {
+        if (!render_ob.render) { throw new Error('object must have method - render()'); }
         RENDER_ITEMS.push(render_ob);
     },
     removeFromRender: function(render_ob) {

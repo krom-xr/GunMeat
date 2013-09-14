@@ -3,11 +3,6 @@
 //TODO поворот - выстрел - без дистанции
 
 
-
-
-
-
-
 var Bullet = function(angle, x, y, distance) {
     var sprite = new PIXI.Sprite(textures_static.bullet);
     sprite.anchor.x = 0.5;
@@ -52,8 +47,9 @@ Bullet.prototype = {
         animation.removeFromRender(this);
     },
     isDistancePassed: function() {
-        //TODO тут неправильная математика
-        return this.sprite.position.x > this.distance || this.sprite.position.y > this.distance;
+        var xlen = Math.abs(this.sprite.position.x - this.x0);
+        var ylen = Math.abs(this.sprite.position.y - this.y0);
+        return (xlen * xlen + ylen * ylen) >= this.distance * this.distance;
     },
     isHalfDistancePassed: function () {
         //TODO тут неправильная математика
@@ -92,7 +88,21 @@ var BigGun = function(x, y) {
     };
     sprite.mouseup = function() {
         if (drag) {
-            it.shot(45 * Math.random());
+            //it.shot(45 * Math.random());
+            it.shot(-90);
+            it.shot(-75);
+            it.shot(-60);
+            it.shot(-45);
+            it.shot(-30);
+            it.shot(-15);
+            it.shot(0);
+            it.shot(15);
+            it.shot(30);
+            it.shot(45);
+            it.shot(60);
+            it.shot(75);
+            it.shot(90);
+            //it.shot(45);
             drag = false;
         }
     };
@@ -108,8 +118,7 @@ BigGun.prototype = {
     }
 };
 
-
-
-var bigGun = new BigGun(300, 50);
-
+$(document).ready(function() {
+    var bigGun = new BigGun($(window).width()/2, 50);
+});
 
