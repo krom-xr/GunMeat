@@ -132,8 +132,35 @@ BigGun.prototype = {
     }
 };
 
+
+var Soldier = function() {
+    var sprite = new PIXI.Sprite(textures_static.soldier);
+    sprite.anchor.x = 0.5;
+    sprite.anchor.y = 0.5;
+    sprite.position.x = 50;
+    sprite.position.y = 50;
+    stage.addChild(sprite);
+    this.sprite = sprite;
+    animation.pushToRender(this);
+};
+Soldier.prototype = {
+    dots: [
+        {x: 50, y: 50},
+        {x: 80, y: 70},
+        {x: 60, y: 150},
+
+    ],
+    renderRun: function() {
+
+    },
+    render: function() {
+        //this.sprite.position.x += 1;
+    }
+}
+
 $(document).ready(function() {
-    var bigGun = new BigGun($(window).width()/2, 50, 0);
-    var bigGun = new BigGun($(window).width()/2, $(window).height() - 50, 180);
+    var big_gun1 = new BigGun($(window).width()/2, 50, 0);
+    var big_gun2 = new BigGun($(window).width()/2, $(window).height() - 50, 180);
+    var soldier1 = new Soldier();
 });
 
