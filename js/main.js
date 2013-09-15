@@ -65,13 +65,15 @@ Bullet.prototype = {
 };
 
 
-var BigGun = function(x, y) {
+var BigGun = function(x, y, angle) {
     var it = this;
     var sprite = new PIXI.Sprite(textures_static.big_gun);
     sprite.anchor.x = 0.5;
     sprite.anchor.y = 0.5;
     sprite.position.x = x;
     sprite.position.y = y;
+
+    sprite.rotation = angle.toRad();
 
     stage.addChild(sprite);
 
@@ -88,7 +90,6 @@ var BigGun = function(x, y) {
     };
     sprite.mouseup = function() {
         if (drag) {
-            //it.shot(45 * Math.random());
             it.shot(-90);
             it.shot(-75);
             it.shot(-60);
@@ -102,7 +103,20 @@ var BigGun = function(x, y) {
             it.shot(60);
             it.shot(75);
             it.shot(90);
-            //it.shot(45);
+
+            it.shot(105);
+            it.shot(120);
+            it.shot(135);
+            it.shot(150);
+            it.shot(165);
+            it.shot(180);
+            it.shot(-105);
+            it.shot(-120);
+            it.shot(-135);
+            it.shot(-150);
+            it.shot(-165);
+            it.shot(-180);
+
             drag = false;
         }
     };
@@ -119,6 +133,7 @@ BigGun.prototype = {
 };
 
 $(document).ready(function() {
-    var bigGun = new BigGun($(window).width()/2, 50);
+    var bigGun = new BigGun($(window).width()/2, 50, 0);
+    var bigGun = new BigGun($(window).width()/2, $(window).height() - 50, 180);
 });
 
