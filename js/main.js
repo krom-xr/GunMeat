@@ -215,9 +215,9 @@ Soldier.prototype = {
     renderRun: function() {
         if (this.current_dot_index < this.dots.length){
             
+            // Нужно сделать нормальное определение направления
             var dx = this.sprite.position.x - this.dots[this.current_dot_index].x;
             var dy = this.sprite.position.y - this.dots[this.current_dot_index].y;
-
             this.sprite.rotation = Math.tan(dx, dy) + this.angle.toRad(-90);
 
             this.sprite.position.x = this.dots[this.current_dot_index].x;
