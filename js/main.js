@@ -20,6 +20,7 @@ var Bullet = function(angle, x, y, distance) {
     this.y0 = y;
     this.start_time = new Date().getTime();
 };
+
 Bullet.prototype = {
     renderFly: function() {
         var timediff = new Date().getTime() - this.start_time;
@@ -122,9 +123,8 @@ var BigGun = function(x, y, angle) {
     };
     this.x = x; this.y = y;
     this.sprite = sprite;
-
-
 };
+
 BigGun.prototype = {
     shot: function(angle) {
         var bullet = new Bullet(angle, this.x, this.y, 500);
@@ -143,6 +143,7 @@ var Soldier = function() {
     this.sprite = sprite;
     animation.pushToRender(this);
 };
+
 Soldier.prototype = {
     dots: [
         {x: 50, y: 50},
@@ -159,8 +160,8 @@ Soldier.prototype = {
 }
 
 $(document).ready(function() {
-    var big_gun1 = new BigGun($(window).width()/2, 50, 0);
-    var big_gun2 = new BigGun($(window).width()/2, $(window).height() - 50, 180);
+    var big_gun1 = new BigGun(70, $(window).height()/2, 270);
+    var big_gun2 = new BigGun($(window).width()-70, $(window).height()/2, 90);
     var soldier1 = new Soldier();
 });
 

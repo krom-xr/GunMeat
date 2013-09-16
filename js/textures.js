@@ -1,8 +1,8 @@
 /*global PIXI, animation */
 var textures_static = {
-    bullet: PIXI.Texture.fromImage('img/bullet.png'),
-    big_gun: PIXI.Texture.fromImage('img/big_gun.png'),
-    soldier: PIXI.Texture.fromImage('img/soldier.png')
+    bullet: PIXI.Texture.fromImage('img/ball.png'),
+    big_gun: PIXI.Texture.fromImage('img/cannon.png'),
+    soldier: PIXI.Texture.fromImage('img/soldier_top_down.png')
 
 };
 var textures_sequence = {

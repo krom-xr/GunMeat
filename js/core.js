@@ -49,7 +49,7 @@ var animation = {
 };
 
 $(document).ready(function() {
-    var renderer = PIXI.autoDetectRenderer($(window).width(), $(window).height());
+    var renderer = PIXI.autoDetectRenderer($(window).width()-10, $(window).height()-10);
     requestAnimFrame(animate);
     function animate() {
         requestAnimFrame(animate);
