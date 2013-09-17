@@ -33,8 +33,8 @@ Bullet.prototype = {
             this.sprite.scale.y += 1/this.distance;
         }
 
-        this.sprite.position.x = this.x0 + BULLET_SPEED * timediff * Math.sin(this.angle.toRad());
-        this.sprite.position.y = this.y0 + BULLET_SPEED * timediff * Math.cos(this.angle.toRad());
+        this.sprite.position.x = this.x0 + BULLET_SPEED * timediff * Math.sin(this.angle);
+        this.sprite.position.y = this.y0 + BULLET_SPEED * timediff * Math.cos(this.angle);
     },
     renderBoom: function() {
         var it = this;
@@ -74,58 +74,48 @@ var BigGun = function(x, y, angle) {
     sprite.position.x = x;
     sprite.position.y = y;
 
-    sprite.rotation = angle.toRad();
+    sprite.rotation = angle;
 
     stage.addChild(sprite);
 
 
-    sprite.interactive = true; // Почему не setInteractive?
+    sprite.setInteractive(true);
 
     var drag = false;
-    sprite.mousedown = function() {
+    var start_coord = { x: sprite.position.x, y: sprite.position.y };
+    var stop_coord;
+    sprite.mousedown = function(data) {
         drag = true;
-
     };
     sprite.mousemove = function() {
 
     };
-    sprite.mouseup = function() {
-        if (drag) {
-            it.shot(-90);
-            it.shot(-75);
-            it.shot(-60);
-            it.shot(-45);
-            it.shot(-30);
-            it.shot(-15);
-            it.shot(0);
-            it.shot(15);
-            it.shot(30);
-            it.shot(45);
-            it.shot(60);
-            it.shot(75);
-            it.shot(90);
 
-            it.shot(105);
-            it.shot(120);
-            it.shot(135);
-            it.shot(150);
-            it.shot(165);
-            it.shot(180);
-            it.shot(-105);
-            it.shot(-120);
-            it.shot(-135);
-            it.shot(-150);
-            it.shot(-165);
-            it.shot(-180);
-
-            drag = false;
-        }
+    sprite.mouseupoutside = function(data){
+        if (!drag) { return; }
+        stop_coord = data.global.clone();
+        var angle_lenght = utils.getAngleLength(start_coord, stop_coord);
+        it.shot(angle_lenght.angle);
+        drag = false;
     };
+
     this.x = x; this.y = y;
     this.sprite = sprite;
 };
 
 BigGun.prototype = {
+    //calculate: function(start, stop) {
+        //var length = Math.sqrt(Math.pow(start.x - stop.x, 2) + Math.pow(start.y - stop.y, 2));
+        //var sinA = Math.sqrt(Math.pow(start.x - stop.x, 2)) / length;
+        //var angle = Math.asin(sinA);
+
+        //if (start.y < stop.y && start.x < stop.x) { angle = angle; }
+        //if (start.y > stop.y && start.x < stop.x) { angle = (180).toRad() - angle; }
+        //if (start.y < stop.y && start.x > stop.x) { angle = - angle; }
+        //if (start.y > stop.y && start.x > stop.x) { angle = -1* ((180).toRad() - angle); }
+
+        //return {angle: angle, length: length};
+    //},
     shot: function(angle) {
         var bullet = new Bullet(angle, this.x, this.y, 500);
         animation.pushToRender(bullet);
@@ -233,7 +223,7 @@ Soldier.prototype = {
 };
 
 $(document).ready(function() {
-    var big_gun1 = new BigGun(70, $(window).height()/2, 270);
-    var big_gun2 = new BigGun($(window).width()-70, $(window).height()/2, 90);
+    var big_gun1 = new BigGun(70, $(window).height()/2, (270).toRad());
+    var big_gun2 = new BigGun($(window).width()-70, $(window).height()/2, (90).toRad());
     var soldier1 = new Soldier(50, 50, 90);
 });
