@@ -1,4 +1,4 @@
-/*global PIXI, requestAnimFrame, _, utils, animation, stage */
+/*global PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence */
 //TODO Вращение пушки
 //TODO поворот - выстрел - без дистанции
 
@@ -85,7 +85,7 @@ var BigGun = function(x, y, angle) {
     sprite.mousedown = function() {
         drag = true;
 
-    };
+    }
     sprite.mousemove = function() {
 
     };
@@ -147,15 +147,15 @@ var Soldier = function(x, y, angle) {
 
     sprite.mousemove = function(mouseData){
         if (it.is_mouse_down){
-            data = mouseData.global.clone();
+            var data = mouseData.global.clone();
             it.dots.push(data);
         }
-    }
+    };
 
     sprite.mousedown = function(mouseData){
         it.is_mouse_down = true;
         it.dots = [];
-    }
+    };
 
     sprite.mouseupoutside = function(mouseData){
         it.is_mouse_down = false;
@@ -163,7 +163,7 @@ var Soldier = function(x, y, angle) {
         it.dots = it.normalize_path();
         this.start_time = new Date().getTime();
         animation.pushToRender(it);
-    }
+    };
 
     stage.addChild(sprite);
     this.angle = angle;
@@ -177,7 +177,7 @@ Soldier.prototype = {
     get_line_points: function line(x0, y0, x1, y1){
         // source: http://stackoverflow.com/questions/4672279/bresenham-algorithm-in-javascript
         // Работает плохо, линия не плавная
-        var line_dots = new Array();
+        var line_dots = [];
         var dx = Math.abs(x1-x0);
         var dy = Math.abs(y1-y0);
         var sx = (x0 < x1) ? 1 : -1;
@@ -185,31 +185,31 @@ Soldier.prototype = {
         var err = dx-dy;
 
         while(true){
-          if ((x0==x1) && (y0==y1)) {
+          if ((x0===x1) && (y0===y1)) {
               return line_dots;
           }
           var e2 = 2*err;
           if (e2 >-dy){ err -= dy; x0  += sx; }
           if (e2 < dx){ err += dx; y0  += sy; }
-          line_dots.push({x:x0, y:y0})
+          line_dots.push({x:x0, y:y0});
         }
     },
     normalize_path: function(){
         // Заполняет пробелы в пути
         // Нужно еще удалить дубли
-        var result_path = new Array();
+        var result_path = [];
         var current_index = 0;
         while (current_index + 1 < this.dots.length){
             result_path.push(this.dots[current_index]);
             if ( (Math.abs((this.dots[current_index].x-this.dots[current_index+1].x))>1) ||
                  (Math.abs((this.dots[current_index].y-this.dots[current_index+1].y))>1) ){
-                result_path = result_path.concat(this.get_line_points(this.dots[current_index].x, 
+                result_path = result_path.concat(this.get_line_points(this.dots[current_index].x,
                                                          this.dots[current_index].y,
                                                          this.dots[current_index+1].x,
                                                          this.dots[current_index+1].y));
-            };
+            }
             current_index += 1;
-        };
+        }
         return result_path;
     },
     renderRun: function() {
@@ -230,7 +230,7 @@ Soldier.prototype = {
     render: function() {
         this.renderRun();
     },
-}
+};
 
 $(document).ready(function() {
     var big_gun1 = new BigGun(70, $(window).height()/2, 270);
