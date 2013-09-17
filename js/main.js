@@ -85,7 +85,7 @@ var BigGun = function(x, y, angle) {
     sprite.mousedown = function() {
         drag = true;
 
-    }
+    };
     sprite.mousemove = function() {
 
     };
