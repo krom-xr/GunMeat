@@ -1,4 +1,4 @@
-/*global PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence */
+/*global PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, BULLET_DISTANCE_COEFFICIENT */
 //TODO Вращение пушки
 //TODO поворот - выстрел - без дистанции
 
@@ -87,15 +87,17 @@ var BigGun = function(x, y, angle) {
     sprite.mousedown = function(data) {
         drag = true;
     };
-    sprite.mousemove = function() {
-
+    sprite.mousemove = function(data) {
+        if (!drag) { return false; }
+        var angle_length = utils.getAngleLength(start_coord, data.global);
+        sprite.rotation =  -angle_length.angle;
     };
 
     sprite.mouseupoutside = function(data){
         if (!drag) { return; }
         stop_coord = data.global.clone();
-        var angle_lenght = utils.getAngleLength(start_coord, stop_coord);
-        it.shot(angle_lenght.angle);
+        var angle_length = utils.getAngleLength(start_coord, stop_coord);
+        it.shot(angle_length.angle, angle_length.length);
         drag = false;
     };
 
@@ -104,20 +106,8 @@ var BigGun = function(x, y, angle) {
 };
 
 BigGun.prototype = {
-    //calculate: function(start, stop) {
-        //var length = Math.sqrt(Math.pow(start.x - stop.x, 2) + Math.pow(start.y - stop.y, 2));
-        //var sinA = Math.sqrt(Math.pow(start.x - stop.x, 2)) / length;
-        //var angle = Math.asin(sinA);
-
-        //if (start.y < stop.y && start.x < stop.x) { angle = angle; }
-        //if (start.y > stop.y && start.x < stop.x) { angle = (180).toRad() - angle; }
-        //if (start.y < stop.y && start.x > stop.x) { angle = - angle; }
-        //if (start.y > stop.y && start.x > stop.x) { angle = -1* ((180).toRad() - angle); }
-
-        //return {angle: angle, length: length};
-    //},
-    shot: function(angle) {
-        var bullet = new Bullet(angle, this.x, this.y, 500);
+    shot: function(angle, distance) {
+        var bullet = new Bullet(angle, this.x, this.y, distance * BULLET_DISTANCE_COEFFICIENT);
         animation.pushToRender(bullet);
     }
 };

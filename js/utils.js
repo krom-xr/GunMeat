@@ -157,13 +157,13 @@ utils.getUrlFromNgPattern = function(url, params) {
 };
 
 utils.getAngleLength = function(start_coord, stop_coord) {
-        var length = Math.sqrt(Math.pow(start_coord.x - stop_coord.x, 2) + Math.pow(start_coord.y - stop_coord.y, 2));
-        var sinA = Math.sqrt(Math.pow(start_coord.x - stop_coord.x, 2)) / length;
-        var angle = Math.asin(sinA);
+    var length = Math.sqrt(Math.pow(start_coord.x - stop_coord.x, 2) + Math.pow(start_coord.y - stop_coord.y, 2));
+    var sinA = Math.sqrt(Math.pow(start_coord.x - stop_coord.x, 2)) / length;
+    var angle = Math.asin(sinA);
 
-        if (start_coord.y < stop_coord.y && start_coord.x < stop_coord.x) { angle = angle; }
-        if (start_coord.y > stop_coord.y && start_coord.x < stop_coord.x) { angle = (180).toRad() - angle; }
-        if (start_coord.y < stop_coord.y && start_coord.x > stop_coord.x) { angle = - angle; }
-        if (start_coord.y > stop_coord.y && start_coord.x > stop_coord.x) { angle = -1* ((180).toRad() - angle); }
-        return {angle: angle, length: length};
+    if (start_coord.y <= stop_coord.y && start_coord.x <= stop_coord.x) { angle = angle; }
+    if (start_coord.y >= stop_coord.y && start_coord.x <= stop_coord.x) { angle = (180).toRad() - angle; }
+    if (start_coord.y <= stop_coord.y && start_coord.x >= stop_coord.x) { angle = - angle; }
+    if (start_coord.y >= stop_coord.y && start_coord.x >= stop_coord.x) { angle = -1* ((180).toRad() - angle); }
+    return {angle: angle, length: length};
 };
