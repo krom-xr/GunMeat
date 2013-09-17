@@ -38,6 +38,8 @@ Bullet.prototype = {
     },
     renderBoom: function() {
         var it = this;
+        console.log(stage);
+
         animation.once(this.sprite, textures_sequence.boom, function() {
             it.killSelf();
         }, 1);
@@ -89,14 +91,14 @@ var BigGun = function(x, y, angle) {
     };
     sprite.mousemove = function(data) {
         if (!drag) { return false; }
-        var angle_length = utils.getAngleLength(start_coord, data.global);
-        sprite.rotation =  -angle_length.angle;
+        var angle_length = utils.getAngleAndLength(start_coord, data.global);
+        sprite.rotation =  - angle_length.angle;
     };
 
     sprite.mouseupoutside = function(data){
         if (!drag) { return; }
         stop_coord = data.global.clone();
-        var angle_length = utils.getAngleLength(start_coord, stop_coord);
+        var angle_length = utils.getAngleAndLength(start_coord, stop_coord);
         it.shot(angle_length.angle, angle_length.length);
         drag = false;
     };

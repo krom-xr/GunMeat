@@ -45,7 +45,8 @@ var animation = {
         next_sprite = next_sprite || texture_array[start_from];
         sprite.setTexture(next_sprite);
         index === texture_array.length && loop_callback && loop_callback();
-    }
+    },
+    getRenderObjects: function() { return RENDER_ITEMS; }
 };
 
 $(document).ready(function() {

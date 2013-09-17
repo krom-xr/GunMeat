@@ -156,14 +156,20 @@ utils.getUrlFromNgPattern = function(url, params) {
     return utils.updateUrlParams(url_splitted.join("/"), params_rest);
 };
 
-utils.getAngleLength = function(start_coord, stop_coord) {
+utils.getAngleAndLength = function(start_coord, stop_coord) {
     var length = Math.sqrt(Math.pow(start_coord.x - stop_coord.x, 2) + Math.pow(start_coord.y - stop_coord.y, 2));
     var sinA = Math.sqrt(Math.pow(start_coord.x - stop_coord.x, 2)) / length;
     var angle = Math.asin(sinA);
 
-    if (start_coord.y <= stop_coord.y && start_coord.x <= stop_coord.x) { angle = angle; }
-    if (start_coord.y >= stop_coord.y && start_coord.x <= stop_coord.x) { angle = (180).toRad() - angle; }
-    if (start_coord.y <= stop_coord.y && start_coord.x >= stop_coord.x) { angle = - angle; }
-    if (start_coord.y >= stop_coord.y && start_coord.x >= stop_coord.x) { angle = -1* ((180).toRad() - angle); }
+    if (start_coord.y < stop_coord.y && start_coord.x < stop_coord.x) { angle = angle; console.log('one'); }
+    if (start_coord.y > stop_coord.y && start_coord.x < stop_coord.x) { angle = (180).toRad() - angle; console.log('two'); }
+    if (start_coord.y < stop_coord.y && start_coord.x > stop_coord.x) { angle = - angle; console.log('three');}
+    if (start_coord.y > stop_coord.y && start_coord.x > stop_coord.x) { angle = -1* ((180).toRad() - angle); console.log('four'); }
+
+    if (start_coord.y === stop_coord.y && start_coord.x > stop_coord.x) { angle = (270).toRad(); }
+    if (start_coord.y === stop_coord.y && start_coord.x < stop_coord.x) { angle = (90).toRad(); }
+    if (start_coord.x === stop_coord.x && start_coord.y > stop_coord.y) { angle = (180).toRad(); }
+    if (start_coord.x === stop_coord.x && start_coord.y < stop_coord.y) { angle = (0).toRad(); }
+
     return {angle: angle, length: length};
 };
