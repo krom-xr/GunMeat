@@ -38,9 +38,16 @@ Bullet.prototype = {
     },
     renderBoom: function() {
         var it = this;
-        console.log(stage);
 
         animation.once(this.sprite, textures_sequence.boom, function() {
+            _.each(soldierManager.getSoldiers(), function(soldier) {
+                var hit = utils.dotInRadius(it.sprite.position, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS);
+                if (hit) {
+                    soldier.killSelf();
+                    console.log('солдат убит');
+                }
+            });
+
             it.killSelf();
         }, 1);
 
@@ -156,6 +163,13 @@ Soldier.prototype = {
     dots: [],
     current_dot_index: 0,
     is_mouse_down: false,
+
+    killSelf: function() {
+        stage.removeChild(this.sprite);
+        animation.removeFromRender(this);
+    },
+    getCurrentCoord: function() { return {x: this.sprite.position.x, y: this.sprite.position.y}; },
+
     get_line_points: function line(x0, y0, x1, y1){
         // source: http://stackoverflow.com/questions/4672279/bresenham-algorithm-in-javascript
         // Работает плохо, линия не плавная
@@ -214,8 +228,29 @@ Soldier.prototype = {
     },
 };
 
+var soldierManager = {
+    init: function() {
+        var soldier1 = new Soldier(50, 50, 90);
+        var soldier2 = new Soldier(150, 150, 190);
+        var soldier3 = new Soldier(250, 250, 45);
+        var soldier4 = new Soldier(350, 350, 20);
+        var soldier5 = new Soldier(550, 650, 569);
+        this.addSoldier(soldier1).addSoldier(soldier2).addSoldier(soldier3).addSoldier(soldier4).addSoldier(soldier5);
+
+    },
+    soldiers: [],
+    addSoldier: function(soldier) {
+        this.soldiers.push(soldier);
+        return this;
+    },
+    getSoldiers: function() {
+        return this.soldiers;
+    }
+};
+
 $(document).ready(function() {
     var big_gun1 = new BigGun(70, $(window).height()/2, (270).toRad());
     var big_gun2 = new BigGun($(window).width()-70, $(window).height()/2, (90).toRad());
-    var soldier1 = new Soldier(50, 50, 90);
+    soldierManager.init();
+
 });

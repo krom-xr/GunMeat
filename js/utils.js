@@ -173,3 +173,8 @@ utils.getAngleAndLength = function(start_coord, stop_coord) {
 
     return {angle: angle, length: length};
 };
+
+utils.dotInRadius = function(center, dot, radius) {
+    var length = utils.getAngleAndLength(center, dot).length;
+    return radius > length;
+}
