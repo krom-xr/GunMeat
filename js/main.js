@@ -96,8 +96,8 @@ var BigGun = function(x, y, angle) {
     };
     sprite.mousemove = function(data) {
         if (!drag) { return false; }
-        var angle_length = utils.getAngleAndLength(start_coord, data.global);
-        sprite.rotation =  - angle_length.angle;
+        var angle_length = utils.getAngleAndLength(data.global, start_coord);
+        sprite.rotation = - angle_length.angle;
     };
 
     sprite.mouseupoutside = function(data){
@@ -133,8 +133,8 @@ var Soldier = function(x, y, angle) {
     sprite.setInteractive(true);
 
     var draw = false;
-
     sprite.mousedown = function(data) {
+        it.dots = [];
         draw = true;
     };
     sprite.mousemove = function(data) {
@@ -190,20 +190,19 @@ Soldier.prototype = {
         var possible_length = utils.getLength({x: this.x0, y: this.y0}, {x: possible_x, y: possible_y});
 
         var search_dot = _.find(dots, function(dot) { return dot.current_length > possible_length; });
+        if (!search_dot) { return false; }
         var search_dot_prev = dots[_.indexOf(dots, search_dot) - 1];
-        var angle = utils.getAngleAndLength(search_dot_prev, search_dot).angle;
 
-        var b = search_dot.y - Math.tan(angle) * search_dot.x;
-        var b2 = search_dot_prev.y - Math.tan(angle) * search_dot_prev.x;
+        var lengthdiff = possible_length  - search_dot_prev.current_length;
+        var angle = utils.getAngleAndLength(search_dot, search_dot_prev).angle;
 
-        console.log(b == b2);
-        console.log(b, b2);
+        var xy = utils.getCoordByKxb(search_dot_prev, search_dot, lengthdiff);
 
 
 
-        this.sprite.rotation  = angle;
-        this.sprite.position.x = possible_x;
-        this.sprite.position.y = possible_y;
+        this.sprite.rotation  = - angle;
+        this.sprite.position.x = xy.x;
+        this.sprite.position.y = xy.y;
     },
     render: function() {
         this.renderRun();
@@ -212,7 +211,7 @@ Soldier.prototype = {
 
 var soldierManager = {
     init: function() {
-        var soldier1 = new Soldier(50, 50, 90);
+        var soldier1 = new Soldier(50, 50, 0);
         var soldier2 = new Soldier(150, 150, 190);
         var soldier3 = new Soldier(250, 250, 45);
         var soldier4 = new Soldier(350, 350, 20);
@@ -231,8 +230,8 @@ var soldierManager = {
 };
 
 $(document).ready(function() {
-    var big_gun1 = new BigGun(70, $(window).height()/2, (270).toRad());
-    var big_gun2 = new BigGun($(window).width()-70, $(window).height()/2, (90).toRad());
+    var big_gun1 = new BigGun(70, $(window).height()/2, (90).toRad());
+    var big_gun2 = new BigGun($(window).width()-70, $(window).height()/2, (270).toRad());
     soldierManager.init();
 
 });

@@ -180,19 +180,21 @@ utils.getLength = function(start_coord, stop_coord) {
 utils.dotInRadius = function(center, dot, radius) {
     var length = utils.getAngleAndLength(center, dot).length;
     return radius > length;
-}
+};
 
-utils.getCoordByKxb = function(k, b, dot1, dot2, length) {
-    var x = (dot2.x - dot1.x)/2;
-    var y = k*x + b;
+utils.getCoordByKxb = function(dot1, dot2, length) {
+    var x = dot1.x + (dot2.x - dot1.x)/2;
+    var y = dot1.y + (dot2.y - dot1.y)/2;
+    if (x === 0) { return {x: dot1.x, y: dot1.y + length}; }
+    if (y === 0) { return {x: dot1.x + length, y: dot1.y}; }
+
     var length_possible = utils.getLength(dot1, {x:x, y:y});
-    //console.log(length_possible, y, x);
     if (Math.abs(length_possible - length) < 1) { return {x: x, y: y}; }
 
-    if (length_possible < length) {
-        return utils.getCoordByKxb(k, b, dot1, {x:x, y:y}, length);
-    };
     if (length_possible > length) {
-        return utils.getCoordByKxb(k, b, {x:x, y:y}, dot2, length);
+        return utils.getCoordByKxb(dot1, {x:x, y:y}, length);
     }
-}
+    if (length_possible < length) {
+        return utils.getCoordByKxb({x:x, y:y}, dot2, length - length_possible);
+    }
+};
