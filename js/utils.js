@@ -173,8 +173,26 @@ utils.getAngleAndLength = function(start_coord, stop_coord) {
 
     return {angle: angle, length: length};
 };
+utils.getLength = function(start_coord, stop_coord) {
+    return Math.sqrt(Math.pow(start_coord.x - stop_coord.x, 2) + Math.pow(start_coord.y - stop_coord.y, 2));
+};
 
 utils.dotInRadius = function(center, dot, radius) {
     var length = utils.getAngleAndLength(center, dot).length;
     return radius > length;
+}
+
+utils.getCoordByKxb = function(k, b, dot1, dot2, length) {
+    var x = (dot2.x - dot1.x)/2;
+    var y = k*x + b;
+    var length_possible = utils.getLength(dot1, {x:x, y:y});
+    //console.log(length_possible, y, x);
+    if (Math.abs(length_possible - length) < 1) { return {x: x, y: y}; }
+
+    if (length_possible < length) {
+        return utils.getCoordByKxb(k, b, dot1, {x:x, y:y}, length);
+    };
+    if (length_possible > length) {
+        return utils.getCoordByKxb(k, b, {x:x, y:y}, dot2, length);
+    }
 }

@@ -1,7 +1,5 @@
 /*global PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, BULLET_DISTANCE_COEFFICIENT */
-//TODO Вращение пушки
-//TODO поворот - выстрел - без дистанции
-
+/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED */
 
 var Bullet = function(angle, x, y, distance) {
     var sprite = new PIXI.Sprite(textures_static.bullet);
@@ -134,94 +132,78 @@ var Soldier = function(x, y, angle) {
 
     sprite.setInteractive(true);
 
-    sprite.mousemove = function(mouseData){
-        if (it.is_mouse_down){
-            var data = mouseData.global.clone();
-            it.dots.push(data);
-        }
-    };
+    var draw = false;
 
-    sprite.mousedown = function(mouseData){
-        it.is_mouse_down = true;
-        it.dots = [];
+    sprite.mousedown = function(data) {
+        draw = true;
     };
-
-    sprite.mouseupoutside = function(mouseData){
-        it.is_mouse_down = false;
-        it.current_dot_index = 0;
-        it.dots = it.normalize_path();
-        this.start_time = new Date().getTime();
+    sprite.mousemove = function(data) {
+        if (!draw) { return false; }
+        it.dots.push(data.global.clone());
+    };
+    sprite.mouseupoutside = function(data) {
+        it.start_time = new Date().getTime();
+        draw = false;
+        it.setDotLengths(it.dots);
         animation.pushToRender(it);
     };
 
     stage.addChild(sprite);
     this.angle = angle;
     this.sprite = sprite;
+    this.dots = [];
+    this.x0 = x;
+    this.y0 = y;
 };
 
 Soldier.prototype = {
-    dots: [],
-    current_dot_index: 0,
-    is_mouse_down: false,
-
     killSelf: function() {
         stage.removeChild(this.sprite);
         animation.removeFromRender(this);
     },
     getCurrentCoord: function() { return {x: this.sprite.position.x, y: this.sprite.position.y}; },
+    setDotLengths: function(dots) {
+        _.each(dots, function(dot, i) {
+            if (i === 0) { dot.current_length = 0; return; }
+            var prev_dot = dots[i - 1];
+            dot.current_length = prev_dot.current_length + utils.getLength(dot, prev_dot);
 
-    get_line_points: function line(x0, y0, x1, y1){
-        // source: http://stackoverflow.com/questions/4672279/bresenham-algorithm-in-javascript
-        // Работает плохо, линия не плавная
-        var line_dots = [];
-        var dx = Math.abs(x1-x0);
-        var dy = Math.abs(y1-y0);
-        var sx = (x0 < x1) ? 1 : -1;
-        var sy = (y0 < y1) ? 1 : -1;
-        var err = dx-dy;
+            if (!dot.current_length) {
+                console.log(dot, prev_dot);
 
-        while(true){
-          if ((x0===x1) && (y0===y1)) {
-              return line_dots;
-          }
-          var e2 = 2*err;
-          if (e2 >-dy){ err -= dy; x0  += sx; }
-          if (e2 < dx){ err += dx; y0  += sy; }
-          line_dots.push({x:x0, y:y0});
-        }
-    },
-    normalize_path: function(){
-        // Заполняет пробелы в пути
-        // Нужно еще удалить дубли
-        var result_path = [];
-        var current_index = 0;
-        while (current_index + 1 < this.dots.length){
-            result_path.push(this.dots[current_index]);
-            if ( (Math.abs((this.dots[current_index].x-this.dots[current_index+1].x))>1) ||
-                 (Math.abs((this.dots[current_index].y-this.dots[current_index+1].y))>1) ){
-                result_path = result_path.concat(this.get_line_points(this.dots[current_index].x,
-                                                         this.dots[current_index].y,
-                                                         this.dots[current_index+1].x,
-                                                         this.dots[current_index+1].y));
             }
-            current_index += 1;
-        }
-        return result_path;
+        });
+
     },
     renderRun: function() {
-        if (this.current_dot_index < this.dots.length){
-            
-            // Нужно сделать нормальное определение направления
-            var dx = this.sprite.position.x - this.dots[this.current_dot_index].x;
-            var dy = this.sprite.position.y - this.dots[this.current_dot_index].y;
-            this.sprite.rotation = Math.tan(dx, dy) + this.angle.toRad(-90);
+        var it = this;
+        var dots = it.dots;
 
-            this.sprite.position.x = this.dots[this.current_dot_index].x;
-            this.sprite.position.y = this.dots[this.current_dot_index].y;
-            this.current_dot_index += 1;
-        }else{
-            animation.removeFromRender(this);
-        }
+        //var dot = this.dots.shift();
+        //if (!dot) {
+            //animation.removeFromRender(this);
+            //return;
+        //}
+        var timediff = new Date().getTime() - this.start_time;
+        var possible_x = this.x0 + SOLDIER_SPEED * timediff;
+        var possible_y = this.y0 + SOLDIER_SPEED * timediff;
+        var possible_length = utils.getLength({x: this.x0, y: this.y0}, {x: possible_x, y: possible_y});
+
+        var search_dot = _.find(dots, function(dot) { return dot.current_length > possible_length; });
+        var search_dot_prev = dots[_.indexOf(dots, search_dot) - 1];
+        var angle = utils.getAngleAndLength(search_dot_prev, search_dot).angle;
+
+        var b = search_dot.y - Math.tan(angle) * search_dot.x;
+        var b2 = search_dot_prev.y - Math.tan(angle) * search_dot_prev.x;
+
+        console.log(b == b2);
+        console.log(b, b2);
+
+
+
+        this.sprite.rotation  = angle;
+        this.sprite.position.x = possible_x;
+        this.sprite.position.y = possible_y;
     },
     render: function() {
         this.renderRun();
