@@ -149,11 +149,16 @@ var Soldier = function(x, y, angle) {
     };
 
     stage.addChild(sprite);
+
+
     this.angle = angle;
     this.sprite = sprite;
     this.dots = [];
     this.x0 = x;
     this.y0 = y;
+
+    this.sprite.width = 100;
+    this.sprite.height = 100;
 };
 
 Soldier.prototype = {
@@ -179,11 +184,6 @@ Soldier.prototype = {
         var it = this;
         var dots = it.dots;
 
-        //var dot = this.dots.shift();
-        //if (!dot) {
-            //animation.removeFromRender(this);
-            //return;
-        //}
         var timediff = new Date().getTime() - this.start_time;
         var possible_x = this.x0 + SOLDIER_SPEED * timediff;
         var possible_y = this.y0 + SOLDIER_SPEED * timediff;
@@ -203,6 +203,10 @@ Soldier.prototype = {
         this.sprite.rotation  = - angle;
         this.sprite.position.x = xy.x;
         this.sprite.position.y = xy.y;
+
+        this.sprite.width = 100;
+        this.sprite.height = 100;
+        animation.loop(this.sprite, textures_sequence.soldier_run, SOLDIER_SPEED * 200);
     },
     render: function() {
         this.renderRun();
@@ -215,7 +219,7 @@ var soldierManager = {
         var soldier2 = new Soldier(150, 150, 190);
         var soldier3 = new Soldier(250, 250, 45);
         var soldier4 = new Soldier(350, 350, 20);
-        var soldier5 = new Soldier(550, 650, 569);
+        var soldier5 = new Soldier(550, 350, 569);
         this.addSoldier(soldier1).addSoldier(soldier2).addSoldier(soldier3).addSoldier(soldier4).addSoldier(soldier5);
 
     },

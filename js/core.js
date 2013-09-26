@@ -38,13 +38,20 @@ var animation = {
             finish_callback && finish_callback();
         }
     },
-    loop: function(sprite, texture_array, loop_callback, start_from) {
+    loop: function(sprite, texture_array, speed, start_from, loop_callback) {
+        if (!sprite.last_time) { sprite.last_time = new Date().getTime(); }
+        speed = speed || 1000;
         start_from = start_from || 0;
-        var index = _.indexOf(texture_array, sprite.texture);
-        var next_sprite = index === -1 ? texture_array[start_from] : texture_array[index + 1];
-        next_sprite = next_sprite || texture_array[start_from];
-        sprite.setTexture(next_sprite);
-        index === texture_array.length && loop_callback && loop_callback();
+        var animation_delay = 1000/speed;
+        var current_time = new Date().getTime();
+        if ((current_time - sprite.last_time) > animation_delay) {
+            sprite.last_time = current_time;
+            var index = _.indexOf(texture_array, sprite.texture);
+            var next_sprite = index === -1 ? texture_array[start_from] : texture_array[index + 1];
+            next_sprite = next_sprite || texture_array[start_from];
+            sprite.setTexture(next_sprite);
+            index === texture_array.length && loop_callback && loop_callback();
+        }
     },
 };
 
