@@ -28,14 +28,24 @@ var animation = {
             render_item && render_item.render();
         });
     },
-    once: function(sprite, texture_array, finish_callback, start_from) {
-        start_from = start_from || 0;
+    _once: function(sprite, texture_array, finish_callback, start_from) {
+        sprite.last_time = new Date().getTime();
         var index = _.indexOf(texture_array, sprite.texture);
         var next_sprite = index === -1 ? texture_array[start_from] : texture_array[index + 1];
+
         if (next_sprite) {
             sprite.setTexture(next_sprite);
         } else {
             finish_callback && finish_callback();
+        }
+    },
+    once: function(sprite, texture_array, speed, finish_callback, start_from) {
+        var animation_delay = 1000/(speed || 1000);
+        start_from = start_from || 0;
+        if (!sprite.last_time) { sprite.last_time = new Date().getTime(); }
+        var current_time = new Date().getTime();
+        if ((current_time - sprite.last_time) > animation_delay) {
+            this._once(sprite, texture_array, finish_callback, start_from);
         }
     },
     loop: function(sprite, texture_array, speed, start_from, loop_callback) {

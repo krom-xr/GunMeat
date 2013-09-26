@@ -37,7 +37,7 @@ Bullet.prototype = {
     renderBoom: function() {
         var it = this;
 
-        animation.once(this.sprite, textures_sequence.boom, function() {
+        animation.once(this.sprite, textures_sequence.boom, 5, function() {
             _.each(soldierManager.getSoldiers(), function(soldier) {
                 var hit = utils.dotInRadius(it.sprite.position, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS);
                 if (hit) {
