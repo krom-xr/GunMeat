@@ -17,6 +17,7 @@ var Bullet = function(angle, x, y, distance) {
     this.x0 = x;
     this.y0 = y;
     this.start_time = new Date().getTime();
+    this.animation_once = _.throttle(animation.once, 30);
 };
 
 Bullet.prototype = {
@@ -37,7 +38,7 @@ Bullet.prototype = {
     renderBoom: function() {
         var it = this;
 
-        animation.once(this.sprite, textures_sequence.boom, 5, function() {
+        it.animation_once(this.sprite, textures_sequence.boom, function() {
             _.each(soldierManager.getSoldiers(), function(soldier) {
                 var hit = utils.dotInRadius(it.sprite.position, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS);
                 if (hit) {
@@ -159,6 +160,7 @@ var Soldier = function(x, y, angle) {
 
     this.sprite.width = 100;
     this.sprite.height = 100;
+    this.animation_loop = _.throttle(animation.loop, 10/SOLDIER_SPEED);
 };
 
 Soldier.prototype = {
@@ -206,7 +208,7 @@ Soldier.prototype = {
 
         this.sprite.width = 100;
         this.sprite.height = 100;
-        animation.loop(this.sprite, textures_sequence.soldier_run, SOLDIER_SPEED * 200);
+        this.animation_loop(this.sprite, textures_sequence.soldier_run);
     },
     render: function() {
         this.renderRun();
