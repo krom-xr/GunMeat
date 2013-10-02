@@ -182,6 +182,15 @@ utils.dotInRadius = function(center, dot, radius) {
     return radius > length;
 };
 
+/* rect - {x: 10, y:10, w: 100, h: 200}*/
+utils.dotInRect = function(rect, dot) {
+    if (dot.x < rect.x) { return false; }
+    if (dot.y < rect.y) { return false; }
+    if (dot.x > rect.x + rect.w) { return false; }
+    if (dot.y > rect.y + rect.h) { return false; }
+    return true;
+};
+
 utils.getCoordByKxb = function(dot1, dot2, length) {
     var x = dot1.x + (dot2.x - dot1.x)/2;
     var y = dot1.y + (dot2.y - dot1.y)/2;

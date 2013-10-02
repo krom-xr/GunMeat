@@ -1,4 +1,4 @@
-/*global PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, BULLET_DISTANCE_COEFFICIENT */
+/*global PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT */
 /*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED */
 
 var helper = {
@@ -48,13 +48,30 @@ Bullet.prototype = {
         this.sprite.height = BULLET_DESTROY_RADIUS * 2;
 
         it.animation_once(this.sprite, textures_sequence.boom, function() {
+            var hit_soldiers = [];
             _.each(_.clone(soldierManager.getSoldiers()), function(soldier) {
                 var hit = utils.dotInRadius(it.sprite.position, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS);
-                if (hit) {
-                    soldier.killSelf();
-                    console.log('солдат убит');
-                }
+                hit && hit_soldiers.push(soldier);
             });
+            var hit_stones = [];
+            _.each(stoneManager.stones, function(stone) {
+                var hit = utils.dotInRadius(it.sprite.position, stone.position, BULLET_DESTROY_RADIUS);
+                hit && hit_stones.push(stone);
+            });
+            console.log(hit_soldiers);
+            console.log(hit_stones);
+
+
+
+            _.each(hit_stones, function(stone) {
+                var rect1 = {x: stone.position.x - stone.width/2, y: 0, w: stone.width, h: renderer.height};
+                var rect2 = {x: 0, y: stone.position.y - stone.height/2, w: renderer.width, h: stone.height};
+                console.log(utils.dotInRect(rect1, it.sprite.position));
+                console.log(utils.dotInRect(rect2, it.sprite.position));
+
+
+            });
+
 
             it.killSelf();
         }, 1);
@@ -180,11 +197,6 @@ Soldier.prototype = {
             if (i === 0) { dot.current_length = 0; return; }
             var prev_dot = dots[i - 1];
             dot.current_length = prev_dot.current_length + utils.getLength(dot, prev_dot);
-
-            if (!dot.current_length) {
-                console.log(dot, prev_dot);
-
-            }
         });
 
     },
@@ -240,9 +252,41 @@ var soldierManager = {
         return this.soldiers;
     },
     killSoldier: function(soldier) {
-        console.log(soldier);
         utils.removeElFromArray(soldier, this.soldiers);
     }
+};
+
+var stoneManager = {
+    init: function() {
+        var stone1 = this.getRandomStoneSprite();
+        stone1.position.x = 650;
+        stone1.position.y = 350;
+        stone1.anchor.x = 0.5;
+        stone1.anchor.y = 0.5;
+
+        var stone2 = this.getRandomStoneSprite();
+        stone2.position.x = 850;
+        stone2.position.y = 350;
+        stone2.anchor.x = 0.5;
+        stone2.anchor.y = 0.5;
+
+        stone1.width = 100;
+        stone1.height =100;
+        stone2.width = 100;
+        stone2.height = 100;
+        stage.addChild(stone1);
+        stage.addChild(stone2);
+
+        this.stones.push(stone1);
+        this.stones.push(stone2);
+    },
+    stones: [],
+    getRandomStoneSprite: function() {
+        //var texture = _.sample(this.stone_textures);
+        var texture = textures_static.stone1;
+        var sprite = new PIXI.Sprite(texture);
+        return sprite;
+    },
 };
 
 var stone_array = [
@@ -269,7 +313,6 @@ var randomStoneGrid = function() {
         container.push(arr);
     });
     return [[1]];
-    //console.log(container);
     //return container;
 };
 
@@ -301,6 +344,7 @@ Stones.prototype = {
         (180).toRad(),
         (270).toRad()
     ],
+    stones: [],
     stone_textures: [textures_static.stone1, textures_static.stone2, textures_static.stone3],
     setVerticalStones: function(stones_arr, pos, stone_size) {
         var it = this;
@@ -381,9 +425,10 @@ $(document).ready(function() {
     var big_gun1 = new BigGun(70, $(window).height()/2, (90).toRad());
     var big_gun2 = new BigGun($(window).width()-70, $(window).height()/2, (270).toRad());
     soldierManager.init();
+    stoneManager.init();
 
-    var stone = new Stones(randomStoneGrid(), 90, {x: 500, y: 500});
-    //stone = new Stones(randomStoneGrid(), 90, {x: 300, y: 500});
+    //var stone = new Stones(randomStoneGrid(), 90, {x: 610, y: 350});
+    //new Stones(randomStoneGrid(), 90, {x: 300, y: 500});
     //stone = new Stones(randomStoneGrid(), 90, {x: 600, y: 800});
     //stone = new Stones(randomStoneGrid(), 90, {x: 1600, y: 500});
 

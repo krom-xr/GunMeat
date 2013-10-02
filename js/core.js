@@ -2,6 +2,7 @@
 Number.prototype.toRad = function () { return this * Math.PI / 180; }; // градусы в радианы например: (90).toRad();
 var interactive = true;
 var stage = new PIXI.Stage(0xEEEEEE, interactive);
+var renderer;
 
 var RENDER_ITEMS = [];
 
@@ -49,7 +50,7 @@ var animation = {
 };
 
 $(document).ready(function() {
-    var renderer = PIXI.autoDetectRenderer($(window).width()-10, $(window).height()-10);
+    renderer = PIXI.autoDetectRenderer($(window).width()-10, $(window).height()-10);
     requestAnimFrame(animate);
     function animate() {
         requestAnimFrame(animate);
