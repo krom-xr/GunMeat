@@ -1,6 +1,13 @@
 /*global PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, BULLET_DISTANCE_COEFFICIENT */
 /*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED */
 
+var helper = {
+    killSelf: function(ob) {
+        animation.removeFromRender(ob);
+        setTimeout(function() { stage.removeChild(ob.sprite); }, 500);
+    }
+};
+
 var Bullet = function(angle, x, y, distance) {
     var sprite = new PIXI.Sprite(textures_static.bullet);
     sprite.anchor.x = 0.5;
@@ -37,9 +44,11 @@ Bullet.prototype = {
     },
     renderBoom: function() {
         var it = this;
+        this.sprite.width = BULLET_DESTROY_RADIUS * 2;
+        this.sprite.height = BULLET_DESTROY_RADIUS * 2;
 
         it.animation_once(this.sprite, textures_sequence.boom, function() {
-            _.each(soldierManager.getSoldiers(), function(soldier) {
+            _.each(_.clone(soldierManager.getSoldiers()), function(soldier) {
                 var hit = utils.dotInRadius(it.sprite.position, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS);
                 if (hit) {
                     soldier.killSelf();
@@ -51,10 +60,7 @@ Bullet.prototype = {
         }, 1);
 
     },
-    killSelf: function() {
-        stage.removeChild(this.sprite);
-        animation.removeFromRender(this);
-    },
+    killSelf: function() { helper.killSelf(this); },
     isDistancePassed: function() {
         var xlen = Math.abs(this.sprite.position.x - this.x0);
         var ylen = Math.abs(this.sprite.position.y - this.y0);
@@ -165,8 +171,8 @@ var Soldier = function(x, y, angle) {
 
 Soldier.prototype = {
     killSelf: function() {
-        stage.removeChild(this.sprite);
-        animation.removeFromRender(this);
+        soldierManager.killSoldier(this);
+        helper.killSelf(this);
     },
     getCurrentCoord: function() { return {x: this.sprite.position.x, y: this.sprite.position.y}; },
     setDotLengths: function(dots) {
@@ -232,12 +238,153 @@ var soldierManager = {
     },
     getSoldiers: function() {
         return this.soldiers;
+    },
+    killSoldier: function(soldier) {
+        console.log(soldier);
+        utils.removeElFromArray(soldier, this.soldiers);
     }
 };
+
+var stone_array = [
+    [1, 0, 0],
+    [1, 0, 1],
+    [0, 1, 0],
+    [0, 0, 0],
+    [1, 0, 1],
+];
+
+
+var randomStoneGrid = function() {
+    //var horiz_size = _.range(_.random(2, 7));
+    //var vert_size = _.range(_.random(2, 7));
+    var vert_size = _.range(20);
+    var horiz_size = _.range(10);
+
+    var container = [];
+    _.each(horiz_size, function() {
+        var arr = [];
+        _.each(vert_size, function() {
+            arr.push(_.sample([0, 0, 0, 0, 0, 0, 0, 0, 1]));
+        });
+        container.push(arr);
+    });
+    return [[1]];
+    //console.log(container);
+    //return container;
+};
+
+
+var Stones = function(stone_array, size, xy) {
+    var it = this;
+    var width = stone_array[0].length;
+    var height = stone_array.height;
+    var container = new PIXI.DisplayObjectContainer();
+
+    //container.anchor.x = 0.5;
+    //container.anchor.y = 0.5;
+
+    container.position.x = xy.x;
+    container.position.y = xy.y;
+
+    stage.addChild(container);
+    this.container = container;
+
+    _.each(stone_array, function(subarray, i) {
+        it.setVerticalStones(subarray, i, size);
+    });
+};
+Stones.prototype = {
+    stone_rotations: [
+        (0).toRad(),
+        (45).toRad(),
+        (90).toRad(),
+        (180).toRad(),
+        (270).toRad()
+    ],
+    stone_textures: [textures_static.stone1, textures_static.stone2, textures_static.stone3],
+    setVerticalStones: function(stones_arr, pos, stone_size) {
+        var it = this;
+        //var stone_oversize = 0.7 * stone_size;
+        var stone_oversize = 0;
+        _.each(stones_arr, function(ob, i) {
+            if (ob) {
+                var sprite = it.getRandomStoneSprite();
+
+
+                sprite.anchor.x = 0.5;
+                sprite.anchor.y = 0.5;
+                sprite.position.x = i * stone_size;
+                sprite.position.y = pos * stone_size;
+                //sprite.rotation = _.sample(it.stone_rotations);
+                sprite.rotation = _.sample(_.random(0, 360).toRad());
+
+
+                sprite.width = stone_size + stone_oversize;
+                sprite.height = stone_size + stone_oversize;
+
+                //sprite.scale.x = _.sample([1, -1]) * _.sample([0.2, 0.3, 0.4]);
+                //sprite.scale.y = _.sample([1, -1]) * _.sample([0.2, 0.3, 0.4]);;
+
+                sprite.interactive = true;
+                sprite.dragging = true;
+
+                it.container.addChild(sprite);
+
+                sprite.dragging = false;
+                sprite.mousedown = sprite.touchstart = function(data)
+                {
+                    // stop the default event...
+                    data.originalEvent.preventDefault();
+                    
+                    // store a refference to the data
+                    // The reason for this is because of multitouch
+                    // we want to track the movement of this particular touch
+                    this.data = data;
+                    this.alpha = 0.9;
+                    this.dragging = true;
+                };
+
+
+                sprite.mouseup = sprite.mouseupoutside = sprite.touchend = sprite.touchendoutside = function(data)
+                {
+                    this.alpha = 1;
+                    this.dragging = false;
+                    // set the interaction data to null
+                    this.data = null;
+                };
+                
+                // set the callbacks for when the mouse or a touch moves
+                sprite.mousemove = sprite.touchmove = function(data)
+                {
+                    if(this.dragging)
+                    {
+                        // need to get parent coords..
+                        var newPosition = this.data.getLocalPosition(this.parent);
+                        this.position.x = newPosition.x;
+                        this.position.y = newPosition.y;
+                    }
+                };
+            }
+
+        });
+    },
+    getRandomStoneSprite: function() {
+        //var texture = _.sample(this.stone_textures);
+        var texture = this.stone_textures[0];
+        var sprite = new PIXI.Sprite(texture);
+        return sprite;
+    },
+};
+
 
 $(document).ready(function() {
     var big_gun1 = new BigGun(70, $(window).height()/2, (90).toRad());
     var big_gun2 = new BigGun($(window).width()-70, $(window).height()/2, (270).toRad());
     soldierManager.init();
+
+    var stone = new Stones(randomStoneGrid(), 90, {x: 500, y: 500});
+    //stone = new Stones(randomStoneGrid(), 90, {x: 300, y: 500});
+    //stone = new Stones(randomStoneGrid(), 90, {x: 600, y: 800});
+    //stone = new Stones(randomStoneGrid(), 90, {x: 1600, y: 500});
 
 });

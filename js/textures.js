@@ -2,7 +2,11 @@
 var textures_static = {
     bullet: PIXI.Texture.fromImage('img/ball.png'),
     big_gun: PIXI.Texture.fromImage('img/cannon.png'),
-    soldier: PIXI.Texture.fromImage('img/soldier/soldier_1.png')
+    soldier: PIXI.Texture.fromImage('img/soldier/soldier_1.png'),
+
+    stone1: PIXI.Texture.fromImage('img/stones/stone1.png'),
+    stone2: PIXI.Texture.fromImage('img/stones/stone2.png'),
+    stone3: PIXI.Texture.fromImage('img/stones/stone3.png'),
 
 };
 var textures_sequence = {
