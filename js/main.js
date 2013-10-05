@@ -4,7 +4,15 @@
 var helper = {
     killSelf: function(ob) {
         animation.removeFromRender(ob);
-        setTimeout(function() { stage.removeChild(ob.sprite); }, 500);
+        ob.sprite.alpha = 0;
+        setTimeout(function() { 
+            if (ob.sprite.mask_container) {
+                ob.sprite.mask_container.removeChild(ob.sprite);
+            } else {
+                stage.removeChild(ob.sprite);
+            }
+
+        }, 500);
     }
 };
 
@@ -27,6 +35,19 @@ var Bullet = function(angle, x, y, distance) {
     this.animation_once = _.throttle(animation.once, 30);
 };
 
+//var setBulletMask = function(bullet, stone) {
+    //if (!bullet.mask_container) {
+        //var container = new PIXI.DisplayObjectContainer();
+        //stage.addChild(container);
+        //container.addChild(bullet);
+        //var mask = new PIXI.Graphics();
+        //mask.beginFill(0x0000FF, 1);
+        //mask.drawRect(stone.position.x - 400, stone.position.y + 40, 1800, 800);
+        //container.mask = mask;
+        //bullet.mask_container = container;
+    //}
+//};
+
 Bullet.prototype = {
     renderFly: function() {
         var timediff = new Date().getTime() - this.start_time;
@@ -47,33 +68,69 @@ Bullet.prototype = {
         this.sprite.width = BULLET_DESTROY_RADIUS * 2;
         this.sprite.height = BULLET_DESTROY_RADIUS * 2;
 
-        it.animation_once(this.sprite, textures_sequence.boom, function() {
-            var hit_soldiers = [];
-            _.each(_.clone(soldierManager.getSoldiers()), function(soldier) {
-                var hit = utils.dotInRadius(it.sprite.position, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS);
-                hit && hit_soldiers.push(soldier);
-            });
-            var hit_stones = [];
-            _.each(stoneManager.stones, function(stone) {
-                var hit = utils.dotInRadius(it.sprite.position, stone.position, BULLET_DESTROY_RADIUS);
-                hit && hit_stones.push(stone);
-            });
-            console.log(hit_soldiers);
-            console.log(hit_stones);
+        it.animation_once(this.sprite, textures_sequence.boom, function(data) {
+            if (data.finish) {
+                it.killSelf();
+                return;
+            }
+            //var hit_soldiers = [];
+            //_.each(_.clone(soldierManager.getSoldiers()), function(soldier) {
+                //var hit = utils.dotInRadius(it.sprite.position, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS);
+                //hit && hit_soldiers.push(soldier);
+            //});
+            //var hit_stones = [];
+            //_.each(stoneManager.stones, function(stone) {
+                //var hit = utils.dotInRadius(it.sprite.position, stone.position, BULLET_DESTROY_RADIUS);
+                //hit && hit_stones.push(stone);
+            //});
+            //console.log(hit_soldiers);
+            //console.log(hit_stones);
 
 
 
-            _.each(hit_stones, function(stone) {
-                var rect1 = {x: stone.position.x - stone.width/2, y: 0, w: stone.width, h: renderer.height};
-                var rect2 = {x: 0, y: stone.position.y - stone.height/2, w: renderer.width, h: stone.height};
-                console.log(utils.dotInRect(rect1, it.sprite.position));
-                console.log(utils.dotInRect(rect2, it.sprite.position));
+            //_.each(hit_stones, function(stone) {
+                //var rect1 = {x: stone.position.x - stone.width/2, y: 0, w: stone.width, h: renderer.height};
+                //var rect2 = {x: 0, y: stone.position.y - stone.height/2, w: renderer.width, h: stone.height};
+                ////rect.drawRect
+                
+                //it.setBulletMask(it.sprite, stone);
+
+                ////if (!stone.rect_mask) {
+                    //////console.log('add');
+                    ////var rect = new PIXI.Graphics();
+                    ////stone.rect_mask = rect;
+                    //////rect.moveTo(10, 10);
+
+                    ////rect.beginFill(0x0000FF, 0.1);
+                    ////rect.drawRect(stone.position.x - 400, stone.position.y + 40, 1800, 800);
+
+                    //////stage.addChild(rect);
+                    //////it.sprite.mask = rect;
+
+                    ////var container = new PIXI.DisplayObjectContainer();
+                    ////stage.addChild(container);
+
+                    ////container.addChild(it.sprite);
+                    ////container.mask = rect;
+
+                    //////zcont.mask = rect;
+                    
+                ////}
+                ////if (stone.rect_mask) {
+                    //////it.sprite.mask = stone.rect_mask;
+                    ////stone.rect_mask.beginFill(0x0000FF, 1);
+                    ////stone.rect_mask.drawCircle(stone.position.x, stone.position.y, 5);
+
+                ////}
+
+                
+                ////console.log(utils.dotInRect(rect1, it.sprite.position));
+                ////console.log(utils.dotInRect(rect2, it.sprite.position));
 
 
-            });
+            //});
 
 
-            it.killSelf();
         }, 1);
 
     },
@@ -86,6 +143,18 @@ Bullet.prototype = {
     isHalfDistancePassed: function () {
         //TODO тут неправильная математика
         return this.sprite.position.x > this.distance/2 || this.sprite.position.y > this.distance/2;
+    },
+    setBulletMask: function(bullet, stone) {
+        if (!bullet.mask_container) {
+            var container = new PIXI.DisplayObjectContainer();
+            stage.addChild(container);
+            container.addChild(bullet);
+            var mask = new PIXI.Graphics();
+            mask.beginFill(0x0000FF, 1);
+            mask.drawRect(stone.position.x - 400, stone.position.y + 40, 1800, 800);
+            container.mask = mask;
+            bullet.mask_container = container;
+        }
     },
     render: function() {
         if (this.isDistancePassed()) {
@@ -100,6 +169,9 @@ Bullet.prototype = {
 var BigGun = function(x, y, angle) {
     var it = this;
     var sprite = new PIXI.Sprite(textures_static.big_gun);
+    setTimeout(function() {
+        sprite.setTexture(new PIXI.Sprite(textures_static.soldier));
+    }, 1000);
     sprite.anchor.x = 0.5;
     sprite.anchor.y = 0.5;
     sprite.position.x = x;
@@ -258,6 +330,8 @@ var soldierManager = {
 
 var stoneManager = {
     init: function() {
+        var container = new PIXI.DisplayObjectContainer();
+        zcont = container;
         var stone1 = this.getRandomStoneSprite();
         stone1.position.x = 650;
         stone1.position.y = 350;
@@ -274,8 +348,12 @@ var stoneManager = {
         stone1.height =100;
         stone2.width = 100;
         stone2.height = 100;
-        stage.addChild(stone1);
-        stage.addChild(stone2);
+        //stage.addChild(stone1);
+        //stage.addChild(stone2);
+
+        stage.addChild(container);
+        container.addChild(stone1);
+        container.addChild(stone2);
 
         this.stones.push(stone1);
         this.stones.push(stone2);
@@ -420,8 +498,74 @@ Stones.prototype = {
     },
 };
 
+var inverseGrOb = function(inverse, area_w, area_h) {
+    var x = 0, y = 1;
+    var xmax = 0, xmin = 10000000;
+    var path = [];
+    for (var i = 0; i < inverse.currentPath.points.length; i+=2) {
+        path.push([inverse.currentPath.points[i], inverse.currentPath.points[i + 1]]);
+    };
+    inverse.clear();
+
+    _.each(path, function(dot) { if (xmax < dot[0]) { xmax = dot[0] }; });
+    _.each(path, function(dot) { if (xmin > dot[0]) { xmin = dot[0] }; });
+
+    inverse.beginFill("0x00FF00", 1);
+    inverse.moveTo(xmin, 0);
+    inverse.lineTo(0, 0);
+    inverse.lineTo(0, area_h);
+    inverse.lineTo(xmin, area_h);
+    inverse.lineTo(xmin, 0);
+
+    inverse.beginFill("0x00FFff", 1);
+    inverse.moveTo(xmax, 0);
+    inverse.lineTo(xmax, area_h);
+    inverse.lineTo(area_w, area_h);
+    inverse.lineTo(area_w, 0);
+    inverse.lineTo(xmax, 0);
+
+    _.each(path, function(dot, i) {
+        var dot2 = path[i + 1];
+        if (!dot2) { return false; }
+
+        if (dot[x] < dot2[x]) {
+            inverse.beginFill("0xfff000");
+            inverse.moveTo(dot[x], dot[y]);
+            inverse.lineTo(dot[x], 0);
+            inverse.lineTo(dot2[x], 0);
+            inverse.lineTo(dot2[x], dot2[y]);
+            inverse.lineTo(dot[x], dot[y]);
+        } else {
+            inverse.beginFill("0xfff000");
+            inverse.moveTo(dot[x], dot[y]);
+            inverse.lineTo(dot[x], area_h);
+            inverse.lineTo(dot2[x], area_h);
+            inverse.lineTo(dot2[x], dot2[y]);
+            inverse.lineTo(dot[x], dot[y]);
+        }
+    });
+};
+
+
+
+
 
 $(document).ready(function() {
+
+    var rect = new PIXI.Graphics();
+    stage.addChild(rect);
+    rect.beginFill("0xFFEEAA", 1);
+    rect.moveTo(30, 30);
+    rect.lineTo(200, 30);
+    rect.lineTo(200, 200);
+
+    rect.lineTo(150, 300);
+
+    rect.lineTo(30, 200);
+    rect.lineTo(30, 30);
+
+    inverseGrOb(rect, WIDTH, HEIGHT);
+
     var big_gun1 = new BigGun(70, $(window).height()/2, (90).toRad());
     var big_gun2 = new BigGun($(window).width()-70, $(window).height()/2, (270).toRad());
     soldierManager.init();
@@ -433,3 +577,7 @@ $(document).ready(function() {
     //stone = new Stones(randomStoneGrid(), 90, {x: 1600, y: 500});
 
 });
+
+
+
+

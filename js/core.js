@@ -5,6 +5,7 @@ var stage = new PIXI.Stage(0xEEEEEE, interactive);
 var renderer;
 
 var RENDER_ITEMS = [];
+var WIDTH, HEIGHT;
 
 var animation = {
     loadTextureSequence: function(base_sprite_path, number_of_images, start_from, ext) {
@@ -29,14 +30,17 @@ var animation = {
             render_item && render_item.render();
         });
     },
-    once: function(sprite, texture_array, finish_callback, start_from) {
+    once: function(sprite, texture_array, callback, start_from) {
         var index = _.indexOf(texture_array, sprite.texture);
         var next_sprite = index === -1 ? texture_array[start_from] : texture_array[index + 1];
 
+        console.log('wtf');
         if (next_sprite) {
             sprite.setTexture(next_sprite);
+            callback({index: index, finish: false});
         } else {
-            finish_callback && finish_callback();
+            //finish_callback && finish_callback();
+            callback({index: index, finish: true});
         }
     },
     loop: function(sprite, texture_array, start_from, loop_callback) {
@@ -49,8 +53,12 @@ var animation = {
     },
 };
 
+
+
 $(document).ready(function() {
-    renderer = PIXI.autoDetectRenderer($(window).width()-10, $(window).height()-10);
+    WIDTH = $(window).width()-10;
+    HEIGHT = $(window).height()-10;
+    renderer = PIXI.autoDetectRenderer(WIDTH, HEIGHT);
     requestAnimFrame(animate);
     function animate() {
         requestAnimFrame(animate);
