@@ -16,8 +16,9 @@ var animation = {
 
         var frames = [];
         _.each(_.range(number_of_images), function(num) {
-            frames.push(PIXI.Texture.fromImage(base_sprite_path + (num + 1) + ext));
+            frames.push(getImg(base_sprite_path + (num + 1) + ext));
         });
+        console.log(frames);
         return frames;
     },
     pushToRender: function(render_ob) {
@@ -33,15 +34,17 @@ var animation = {
         });
     },
     once: function(sprite, texture_array, callback, start_from) {
-        var index = _.indexOf(texture_array, sprite.texture);
+        var index = _.indexOf(texture_array, sprite.image);
+        start_from = start_from || 0;
         var next_sprite = index === -1 ? texture_array[start_from] : texture_array[index + 1];
 
-        console.log('wtf');
         if (next_sprite) {
-            sprite.setTexture(next_sprite);
+            sprite.image = next_sprite;
+            sprite.regX  = sprite.image.width * 0.5;
+            sprite.regY = sprite.image.height * 0.5;
+
             callback({index: index, finish: false});
         } else {
-            //finish_callback && finish_callback();
             callback({index: index, finish: true});
         }
     },
@@ -64,8 +67,18 @@ $(document).ready(function() {
     var canvas = $("#main_canvas").get(0);
     canvas.width = WIDTH; canvas.height = HEIGHT;
     stage = new createjs.Stage(canvas);
-    createjs.Ticker.addEventListener("tick", function tick(event) { stage.update(event); });
+    //createjs.Ticker.addEventListener("tick", function tick(event) {
+        //animation.render();
+        //stage.update(event); 
+    //});
 
+    requestAnimationFrame(animate);
+    function animate() {
+        requestAnimationFrame(animate);
+        animation.render(); 
+        stage.update(); 
+
+    }
     //renderer = PIXI.autoDetectRenderer(WIDTH, HEIGHT);
     //requestAnimFrame(animate);
     //function animate() {

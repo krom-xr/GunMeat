@@ -1,11 +1,11 @@
-/*global PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT */
-/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED */
+/*global createjs, PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT */
+/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH */
 
 var helper = {
     killSelf: function(ob) {
         animation.removeFromRender(ob);
         ob.sprite.alpha = 0;
-        setTimeout(function() { 
+        setTimeout(function() {
             if (ob.sprite.mask_container) {
                 ob.sprite.mask_container.removeChild(ob.sprite);
             } else {
@@ -14,25 +14,6 @@ var helper = {
 
         }, 500);
     }
-};
-
-var Bullet = function(angle, x, y, distance) {
-    var sprite = new PIXI.Sprite(textures_static.bullet);
-    sprite.anchor.x = 0.5;
-    sprite.anchor.y = 0.5;
-    sprite.position.x = x;
-    sprite.position.y = y;
-    this.sprite = sprite;
-    this.position = this.sprite.position;
-    stage.addChild(sprite);
-
-    this.distance = distance;
-    this.angle = angle,
-    //this.power = power,
-    this.x0 = x;
-    this.y0 = y;
-    this.start_time = new Date().getTime();
-    this.animation_once = _.throttle(animation.once, 30);
 };
 
 //var setBulletMask = function(bullet, stone) {
@@ -48,20 +29,42 @@ var Bullet = function(angle, x, y, distance) {
     //}
 //};
 
+
+var Bullet = function(angle, x, y, distance) {
+    //var sprite = new PIXI.Sprite(textures_static.bullet);
+    var sprite = new createjs.Bitmap(textures_static.bullet());
+    temp_sprite = sprite;
+    stage.addChild(sprite);
+    sprite.image.after_load(function() {
+        sprite.regX  = sprite.image.width * 0.5;
+        sprite.regY = sprite.image.height * 0.5;
+        sprite.x = x;
+        sprite.y = y;
+        sprite.rotation = angle;
+    });
+
+    //sprite.anchor.x = 0.5;
+    //sprite.anchor.y = 0.5;
+    //sprite.position.x = x;
+    //sprite.position.y = y;
+    this.sprite = sprite;
+    //this.position = this.sprite.position;
+    //stage.addChild(sprite);
+
+    this.distance = distance;
+    this.angle = angle,
+    this.x0 = x;
+    this.y0 = y;
+    this.start_time = new Date().getTime();
+    this.animation_once = _.throttle(animation.once, 30);
+};
+
 Bullet.prototype = {
     renderFly: function() {
         var timediff = new Date().getTime() - this.start_time;
         
-        if (this.isHalfDistancePassed()) {
-            this.sprite.scale.x -= 1/this.distance;
-            this.sprite.scale.y -= 1/this.distance;
-        } else {
-            this.sprite.scale.x += 1/this.distance;
-            this.sprite.scale.y += 1/this.distance;
-        }
-
-        this.sprite.position.x = this.x0 + BULLET_SPEED * timediff * Math.sin(this.angle);
-        this.sprite.position.y = this.y0 + BULLET_SPEED * timediff * Math.cos(this.angle);
+        this.sprite.x = this.x0 + BULLET_SPEED * timediff * Math.sin(this.angle);
+        this.sprite.y = this.y0 + BULLET_SPEED * timediff * Math.cos(this.angle);
     },
     renderBoom: function() {
         var it = this;
@@ -83,8 +86,6 @@ Bullet.prototype = {
                 //var hit = utils.dotInRadius(it.sprite.position, stone.position, BULLET_DESTROY_RADIUS);
                 //hit && hit_stones.push(stone);
             //});
-            //console.log(hit_soldiers);
-            //console.log(hit_stones);
 
 
 
@@ -96,7 +97,6 @@ Bullet.prototype = {
                 //it.setBulletMask(it.sprite, stone);
 
                 ////if (!stone.rect_mask) {
-                    //////console.log('add');
                     ////var rect = new PIXI.Graphics();
                     ////stone.rect_mask = rect;
                     //////rect.moveTo(10, 10);
@@ -124,20 +124,18 @@ Bullet.prototype = {
                 ////}
 
                 
-                ////console.log(utils.dotInRect(rect1, it.sprite.position));
-                ////console.log(utils.dotInRect(rect2, it.sprite.position));
 
 
             //});
 
 
-        }, 1);
+        }, 0);
 
     },
     killSelf: function() { helper.killSelf(this); },
     isDistancePassed: function() {
-        var xlen = Math.abs(this.sprite.position.x - this.x0);
-        var ylen = Math.abs(this.sprite.position.y - this.y0);
+        var xlen = Math.abs(this.sprite.x - this.x0);
+        var ylen = Math.abs(this.sprite.y - this.y0);
         return (xlen * xlen + ylen * ylen) >= this.distance * this.distance;
     },
     isHalfDistancePassed: function () {
@@ -168,6 +166,8 @@ Bullet.prototype = {
 
 var BigGun = function(x, y, angle) {
     var it = this;
+    this.x = x; this.y = y;
+
     var sprite = new createjs.Bitmap(textures_static.big_gun());
     stage.addChild(sprite);
     sprite.image.after_load(function() {
@@ -178,32 +178,33 @@ var BigGun = function(x, y, angle) {
         sprite.rotation = angle;
     });
 
-    var stop_coord;
     document.addEventListener('PointerDown', function(e) {
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
-        if (is_near < 50) {
-            it.pointerId = e.pointerId;
-        }
+        if (is_near < 50) { it.pointerId = e.pointerId; }
     });
     document.addEventListener('PointerMove', function(e) {
-        e.stopPropagation(); e.preventDefault();
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
+
         var angle_length = utils.getAngleAndLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
         sprite.rotation = - angle_length.angle.toGrad();
     }, false);
 
+    document.addEventListener('PointerUp', function(e) {
+        if (it.pointerId === e.pointerId) { 
+            it.pointerId = false;
+
+            var angle_length = utils.getAngleAndLength({x: x, y: y}, {x: e.clientX, y: e.clientY});
+            it.shot(angle_length.angle, angle_length.length);
+        }
+    });
     //sprite.on('pressmove', function() {
-        //console.log('yes');
     //});
     //sprite.addEventListener('mousedown', function(data) {
         //drag = true;
     //});
     //sprite.addEventListener('pressmove', function(data) {
-        ////console.log(data);
         //if (!drag) { return false; }
-        ////console.log(data);
         //var angle_length = utils.getAngleAndLength({x: data.stageX, y: data.stageY}, start_coord);
-        //console.log(angle_length.angle.toGrad());
         //sprite.rotation = - angle_length.angle.toGrad();
     //});
 
@@ -222,6 +223,7 @@ var BigGun = function(x, y, angle) {
 
 BigGun.prototype = {
     shot: function(angle, distance) {
+        console.log(angle, distance);
         var bullet = new Bullet(angle, this.x, this.y, distance * BULLET_DISTANCE_COEFFICIENT);
         animation.pushToRender(bullet);
     }
@@ -343,7 +345,7 @@ var soldierManager = {
 var stoneManager = {
     init: function() {
         var container = new PIXI.DisplayObjectContainer();
-        zcont = container;
+        //zcont = container;
         var stone1 = this.getRandomStoneSprite();
         stone1.position.x = 650;
         stone1.position.y = 350;
@@ -516,11 +518,11 @@ var inverseGrOb = function(inverse, area_w, area_h) {
     var path = [];
     for (var i = 0; i < inverse.currentPath.points.length; i+=2) {
         path.push([inverse.currentPath.points[i], inverse.currentPath.points[i + 1]]);
-    };
+    }
     inverse.clear();
 
-    _.each(path, function(dot) { if (xmax < dot[0]) { xmax = dot[0] }; });
-    _.each(path, function(dot) { if (xmin > dot[0]) { xmin = dot[0] }; });
+    _.each(path, function(dot) { if (xmax < dot[0]) { xmax = dot[0]; } });
+    _.each(path, function(dot) { if (xmin > dot[0]) { xmin = dot[0]; } });
 
     inverse.beginFill("0x00FF00", 1);
     inverse.moveTo(xmin, 0);
