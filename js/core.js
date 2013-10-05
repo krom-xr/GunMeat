@@ -1,11 +1,12 @@
 /*global _, utils, PIXI, requestAnimFrame  */
 Number.prototype.toRad = function () { return this * Math.PI / 180; }; // градусы в радианы например: (90).toRad();
-var interactive = true;
-var stage = new PIXI.Stage(0xEEEEEE, interactive);
-var renderer;
+var WIDTH, HEIGHT;
+
+//var interactive = true;
+//var stage = new PIXI.Stage(0xEEEEEE, interactive);
+//var renderer;
 
 var RENDER_ITEMS = [];
-var WIDTH, HEIGHT;
 
 var animation = {
     loadTextureSequence: function(base_sprite_path, number_of_images, start_from, ext) {
@@ -58,13 +59,19 @@ var animation = {
 $(document).ready(function() {
     WIDTH = $(window).width()-10;
     HEIGHT = $(window).height()-10;
-    renderer = PIXI.autoDetectRenderer(WIDTH, HEIGHT);
-    requestAnimFrame(animate);
-    function animate() {
-        requestAnimFrame(animate);
-        animation.render();
-        renderer.render(stage);
-    }
-    document.body.appendChild(renderer.view);
+
+    var canvas = $("#main_canvas").get(0);
+    canvas.width = WIDTH; canvas.height = HEIGHT;
+    stage = new createjs.Stage(canvas);
+    createjs.Ticker.addEventListener("tick", function tick(event) { stage.update(event); });
+
+    //renderer = PIXI.autoDetectRenderer(WIDTH, HEIGHT);
+    //requestAnimFrame(animate);
+    //function animate() {
+        //requestAnimFrame(animate);
+        //animation.render();
+        //renderer.render(stage);
+    //}
+    //document.body.appendChild(renderer.view);
 });
 

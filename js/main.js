@@ -168,44 +168,43 @@ Bullet.prototype = {
 
 var BigGun = function(x, y, angle) {
     var it = this;
-    var sprite = new PIXI.Sprite(textures_static.big_gun);
-    setTimeout(function() {
-        sprite.setTexture(new PIXI.Sprite(textures_static.soldier));
-    }, 1000);
-    sprite.anchor.x = 0.5;
-    sprite.anchor.y = 0.5;
-    sprite.position.x = x;
-    sprite.position.y = y;
+    sprite = new createjs.Bitmap(textures_static.big_gun);
+    stage.addChild(sprite);
+
+    sprite.regX  = sprite.image.width * 0.5;
+    sprite.regY = sprite.image.height * 0.5;
+
+    sprite.x = x;
+    sprite.y = y;
 
     sprite.rotation = angle;
 
-    stage.addChild(sprite);
 
 
-    sprite.setInteractive(true);
+    //sprite.setInteractive(true);
 
-    var drag = false;
-    var start_coord = { x: sprite.position.x, y: sprite.position.y };
-    var stop_coord;
-    sprite.mousedown = function(data) {
-        drag = true;
-    };
-    sprite.mousemove = function(data) {
-        if (!drag) { return false; }
-        var angle_length = utils.getAngleAndLength(data.global, start_coord);
-        sprite.rotation = - angle_length.angle;
-    };
+    //var drag = false;
+    //var start_coord = { x: sprite.position.x, y: sprite.position.y };
+    //var stop_coord;
+    //sprite.mousedown = function(data) {
+        //drag = true;
+    //};
+    //sprite.mousemove = function(data) {
+        //if (!drag) { return false; }
+        //var angle_length = utils.getAngleAndLength(data.global, start_coord);
+        //sprite.rotation = - angle_length.angle;
+    //};
 
-    sprite.mouseupoutside = function(data){
-        if (!drag) { return; }
-        stop_coord = data.global.clone();
-        var angle_length = utils.getAngleAndLength(start_coord, stop_coord);
-        it.shot(angle_length.angle, angle_length.length);
-        drag = false;
-    };
+    //sprite.mouseupoutside = function(data){
+        //if (!drag) { return; }
+        //stop_coord = data.global.clone();
+        //var angle_length = utils.getAngleAndLength(start_coord, stop_coord);
+        //it.shot(angle_length.angle, angle_length.length);
+        //drag = false;
+    //};
 
-    this.x = x; this.y = y;
-    this.sprite = sprite;
+    //this.x = x; this.y = y;
+    //this.sprite = sprite;
 };
 
 BigGun.prototype = {
@@ -423,7 +422,7 @@ Stones.prototype = {
         (270).toRad()
     ],
     stones: [],
-    stone_textures: [textures_static.stone1, textures_static.stone2, textures_static.stone3],
+    //stone_textures: [textures_static.stone1, textures_static.stone2, textures_static.stone3],
     setVerticalStones: function(stones_arr, pos, stone_size) {
         var it = this;
         //var stone_oversize = 0.7 * stone_size;
@@ -552,29 +551,31 @@ var inverseGrOb = function(inverse, area_w, area_h) {
 
 $(document).ready(function() {
 
-    var rect = new PIXI.Graphics();
-    stage.addChild(rect);
-    rect.beginFill("0xFFEEAA", 1);
-    rect.moveTo(30, 30);
-    rect.lineTo(200, 30);
-    rect.lineTo(200, 200);
+    setTimeout(function() {
+        //var rect = new PIXI.Graphics();
+        //stage.addChild(rect);
+        //rect.beginFill("0xFFEEAA", 1);
+        //rect.moveTo(30, 30);
+        //rect.lineTo(200, 30);
+        //rect.lineTo(200, 200);
 
-    rect.lineTo(150, 300);
+        //rect.lineTo(150, 300);
 
-    rect.lineTo(30, 200);
-    rect.lineTo(30, 30);
+        //rect.lineTo(30, 200);
+        //rect.lineTo(30, 30);
 
-    inverseGrOb(rect, WIDTH, HEIGHT);
+        //inverseGrOb(rect, WIDTH, HEIGHT);
 
-    var big_gun1 = new BigGun(70, $(window).height()/2, (90).toRad());
-    var big_gun2 = new BigGun($(window).width()-70, $(window).height()/2, (270).toRad());
-    soldierManager.init();
-    stoneManager.init();
+        var big_gun1 = new BigGun(70, HEIGHT/2, 90);
+        //var big_gun2 = new BigGun($(window).width()-70, $(window).height()/2, (270).toRad());
+        //soldierManager.init();
+        //stoneManager.init();
 
-    //var stone = new Stones(randomStoneGrid(), 90, {x: 610, y: 350});
-    //new Stones(randomStoneGrid(), 90, {x: 300, y: 500});
-    //stone = new Stones(randomStoneGrid(), 90, {x: 600, y: 800});
-    //stone = new Stones(randomStoneGrid(), 90, {x: 1600, y: 500});
+        //var stone = new Stones(randomStoneGrid(), 90, {x: 610, y: 350});
+        //new Stones(randomStoneGrid(), 90, {x: 300, y: 500});
+        //stone = new Stones(randomStoneGrid(), 90, {x: 600, y: 800});
+        //stone = new Stones(randomStoneGrid(), 90, {x: 1600, y: 500});
+    }, 1000);
 
 });
 
