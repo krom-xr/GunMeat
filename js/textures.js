@@ -1,6 +1,13 @@
 /*global PIXI, animation */
 var getImg = function(src) {
     var img = new Image();
+    img.after_load = function(callback) {
+        if (img.width) { 
+            callback();
+        } else {
+            img.onload = callback;
+        }
+    }
     img.src = src;
     return img;
 };
@@ -8,7 +15,7 @@ var getImg = function(src) {
 var textures_static = {
     //bullet: PIXI.Texture.fromImage('img/ball.png'),
     //big_gun: PIXI.Texture.fromImage('img/cannon.png'),
-    big_gun: getImg('img/cannon.png'),
+    big_gun: function() { return getImg('img/cannon.png') },
     //soldier: PIXI.Texture.fromImage('img/soldier/soldier_1.png'),
 
     //stone1: PIXI.Texture.fromImage('img/stones/stone1.png'),

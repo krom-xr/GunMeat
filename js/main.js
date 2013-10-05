@@ -168,32 +168,44 @@ Bullet.prototype = {
 
 var BigGun = function(x, y, angle) {
     var it = this;
-    sprite = new createjs.Bitmap(textures_static.big_gun);
+    var sprite = new createjs.Bitmap(textures_static.big_gun());
     stage.addChild(sprite);
+    sprite.image.after_load(function() {
+        sprite.regX  = sprite.image.width * 0.5;
+        sprite.regY = sprite.image.height * 0.5;
+        sprite.x = x;
+        sprite.y = y;
+        sprite.rotation = angle;
+    });
 
-    sprite.regX  = sprite.image.width * 0.5;
-    sprite.regY = sprite.image.height * 0.5;
+    var stop_coord;
+    document.addEventListener('PointerDown', function(e) {
+        var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
+        if (is_near < 50) {
+            it.pointerId = e.pointerId;
+        }
+    });
+    document.addEventListener('PointerMove', function(e) {
+        e.stopPropagation(); e.preventDefault();
+        if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
+        var angle_length = utils.getAngleAndLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
+        sprite.rotation = - angle_length.angle.toGrad();
+    }, false);
 
-    sprite.x = x;
-    sprite.y = y;
-
-    sprite.rotation = angle;
-
-
-
-    //sprite.setInteractive(true);
-
-    //var drag = false;
-    //var start_coord = { x: sprite.position.x, y: sprite.position.y };
-    //var stop_coord;
-    //sprite.mousedown = function(data) {
+    //sprite.on('pressmove', function() {
+        //console.log('yes');
+    //});
+    //sprite.addEventListener('mousedown', function(data) {
         //drag = true;
-    //};
-    //sprite.mousemove = function(data) {
+    //});
+    //sprite.addEventListener('pressmove', function(data) {
+        ////console.log(data);
         //if (!drag) { return false; }
-        //var angle_length = utils.getAngleAndLength(data.global, start_coord);
-        //sprite.rotation = - angle_length.angle;
-    //};
+        ////console.log(data);
+        //var angle_length = utils.getAngleAndLength({x: data.stageX, y: data.stageY}, start_coord);
+        //console.log(angle_length.angle.toGrad());
+        //sprite.rotation = - angle_length.angle.toGrad();
+    //});
 
     //sprite.mouseupoutside = function(data){
         //if (!drag) { return; }
@@ -205,6 +217,7 @@ var BigGun = function(x, y, angle) {
 
     //this.x = x; this.y = y;
     //this.sprite = sprite;
+    return this;
 };
 
 BigGun.prototype = {
@@ -551,7 +564,6 @@ var inverseGrOb = function(inverse, area_w, area_h) {
 
 $(document).ready(function() {
 
-    setTimeout(function() {
         //var rect = new PIXI.Graphics();
         //stage.addChild(rect);
         //rect.beginFill("0xFFEEAA", 1);
@@ -566,8 +578,10 @@ $(document).ready(function() {
 
         //inverseGrOb(rect, WIDTH, HEIGHT);
 
+    //setTimeout(function() {
         var big_gun1 = new BigGun(70, HEIGHT/2, 90);
-        //var big_gun2 = new BigGun($(window).width()-70, $(window).height()/2, (270).toRad());
+        var big_gun2 = new BigGun(WIDTH - 70, HEIGHT/2, 270);
+    //}, 1000);
         //soldierManager.init();
         //stoneManager.init();
 
@@ -575,7 +589,6 @@ $(document).ready(function() {
         //new Stones(randomStoneGrid(), 90, {x: 300, y: 500});
         //stone = new Stones(randomStoneGrid(), 90, {x: 600, y: 800});
         //stone = new Stones(randomStoneGrid(), 90, {x: 1600, y: 500});
-    }, 1000);
 
 });
 

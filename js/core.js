@@ -1,5 +1,6 @@
 /*global _, utils, PIXI, requestAnimFrame  */
 Number.prototype.toRad = function () { return this * Math.PI / 180; }; // градусы в радианы например: (90).toRad();
+Number.prototype.toGrad = function() { return this * 180 / Math.PI; }; // радианы в градусы
 var WIDTH, HEIGHT;
 
 //var interactive = true;
