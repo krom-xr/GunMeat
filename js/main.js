@@ -33,7 +33,6 @@ var helper = {
 var Bullet = function(angle, x, y, distance) {
     //var sprite = new PIXI.Sprite(textures_static.bullet);
     var sprite = new createjs.Bitmap(textures_static.bullet());
-    temp_sprite = sprite;
     stage.addChild(sprite);
     sprite.image.after_load(function() {
         sprite.regX  = sprite.image.width * 0.5;
@@ -42,21 +41,13 @@ var Bullet = function(angle, x, y, distance) {
         sprite.y = y;
         sprite.rotation = angle;
     });
-
-    //sprite.anchor.x = 0.5;
-    //sprite.anchor.y = 0.5;
-    //sprite.position.x = x;
-    //sprite.position.y = y;
     this.sprite = sprite;
-    //this.position = this.sprite.position;
-    //stage.addChild(sprite);
-
     this.distance = distance;
     this.angle = angle,
     this.x0 = x;
     this.y0 = y;
     this.start_time = new Date().getTime();
-    this.animation_once = _.throttle(animation.once, 30);
+    this.animation_once = _.throttle(animation.once, 50);
 };
 
 Bullet.prototype = {
@@ -190,7 +181,7 @@ var BigGun = function(x, y, angle) {
     }, false);
 
     document.addEventListener('PointerUp', function(e) {
-        if (it.pointerId === e.pointerId) { 
+        if (it.pointerId === e.pointerId) {
             it.pointerId = false;
 
             var angle_length = utils.getAngleAndLength({x: x, y: y}, {x: e.clientX, y: e.clientY});
@@ -223,7 +214,6 @@ var BigGun = function(x, y, angle) {
 
 BigGun.prototype = {
     shot: function(angle, distance) {
-        console.log(angle, distance);
         var bullet = new Bullet(angle, this.x, this.y, distance * BULLET_DISTANCE_COEFFICIENT);
         animation.pushToRender(bullet);
     }
@@ -232,17 +222,40 @@ BigGun.prototype = {
 
 var Soldier = function(x, y, angle) {
     var it = this;
-    var sprite = new PIXI.Sprite(textures_static.soldier);
-    sprite.anchor.x = 0.5;
-    sprite.anchor.y = 0.5;
-    sprite.position.x = x;
-    sprite.position.y = y;
-
-    sprite.rotation = angle.toRad();
-
-    sprite.setInteractive(true);
+    var sprite = new createjs.Bitmap(textures_static.soldier());
+    stage.addChild(sprite);
+    sprite.image.after_load(function() {
+        sprite.regX  = sprite.image.width * 0.5;
+        sprite.regY = sprite.image.height * 0.5;
+        sprite.x = x;
+        sprite.y = y;
+        sprite.rotation = angle;
+    });
 
     var draw = false;
+
+    document.addEventListener('PointerDown', function(e) {
+        e.stopPropagation(); e.preventDefault();
+        var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: it.sprite.x, y: it.sprite.y});
+        if (is_near < 50) { 
+            it.pointerId = e.pointerId;
+            it.dots = [];
+        }
+    });
+    document.addEventListener('PointerMove', function(e) {
+        if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
+        it.dots.push({x: e.clientX, y: e.clientY});
+    }, false);
+    document.addEventListener('PointerUp', function(e) {
+        if (it.pointerId === e.pointerId) {
+            it.pointerId = false;
+            it.start_time = new Date().getTime();
+            it.setDotLengths(it.dots);
+            animation.pushToRender(it);
+        }
+    });
+
+
     sprite.mousedown = function(data) {
         it.dots = [];
         draw = true;
@@ -290,28 +303,31 @@ Soldier.prototype = {
         var it = this;
         var dots = it.dots;
 
+
         var timediff = new Date().getTime() - this.start_time;
         var possible_x = this.x0 + SOLDIER_SPEED * timediff;
         var possible_y = this.y0 + SOLDIER_SPEED * timediff;
         var possible_length = utils.getLength({x: this.x0, y: this.y0}, {x: possible_x, y: possible_y});
 
         var search_dot = _.find(dots, function(dot) { return dot.current_length > possible_length; });
+        
         if (!search_dot) { return false; }
         var search_dot_prev = dots[_.indexOf(dots, search_dot) - 1];
 
         var lengthdiff = possible_length  - search_dot_prev.current_length;
-        var angle = utils.getAngleAndLength(search_dot, search_dot_prev).angle;
+        var angle = utils.getAngleAndLength(search_dot, search_dot_prev).angle.toGrad();
 
         var xy = utils.getCoordByKxb(search_dot_prev, search_dot, lengthdiff);
 
 
 
         this.sprite.rotation  = - angle;
-        this.sprite.position.x = xy.x;
-        this.sprite.position.y = xy.y;
+        this.sprite.x = xy.x;
+        this.sprite.y = xy.y;
 
-        this.sprite.width = 100;
-        this.sprite.height = 100;
+
+        //this.sprite.width = 100;
+        //this.sprite.height = 100;
         this.animation_loop(this.sprite, textures_sequence.soldier_run);
     },
     render: function() {
@@ -584,7 +600,7 @@ $(document).ready(function() {
         var big_gun1 = new BigGun(70, HEIGHT/2, 90);
         var big_gun2 = new BigGun(WIDTH - 70, HEIGHT/2, 270);
     //}, 1000);
-        //soldierManager.init();
+        soldierManager.init();
         //stoneManager.init();
 
         //var stone = new Stones(randomStoneGrid(), 90, {x: 610, y: 350});

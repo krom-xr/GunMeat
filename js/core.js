@@ -18,7 +18,6 @@ var animation = {
         _.each(_.range(number_of_images), function(num) {
             frames.push(getImg(base_sprite_path + (num + 1) + ext));
         });
-        console.log(frames);
         return frames;
     },
     pushToRender: function(render_ob) {
@@ -50,10 +49,10 @@ var animation = {
     },
     loop: function(sprite, texture_array, start_from, loop_callback) {
         start_from = start_from || 0;
-        var index = _.indexOf(texture_array, sprite.texture);
+        var index = _.indexOf(texture_array, sprite.image);
         var next_sprite = index === -1 ? texture_array[start_from] : texture_array[index + 1];
         next_sprite = next_sprite || texture_array[start_from];
-        sprite.setTexture(next_sprite);
+        sprite.image = next_sprite;
         index === texture_array.length && loop_callback && loop_callback();
     },
 };
