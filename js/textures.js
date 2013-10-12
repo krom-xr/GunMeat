@@ -14,10 +14,12 @@ var getImg = function(src) {
 
 var textures_static = {
     bullet: function() { return getImg('img/ball.png'); },
-    big_gun: function() { return getImg('img/cannon.png') },
+    big_gun: function() { return getImg('img/cannon.png'); },
     soldier: function() { return getImg('img/soldier/soldier_1.png'); },// PIXI.Texture.fromImage('img/soldier/soldier_1.png'),
 
-    //stone1: PIXI.Texture.fromImage('img/stones/stone1.png'),
+    stone1: function() { return getImg('img/stones/stone1.png'); },
+    stone1: function() { return getImg('img/stones/stone2.png'); },
+    stone1: function() { return getImg('img/stones/stone3.png'); },
     //stone2: PIXI.Texture.fromImage('img/stones/stone2.png'),
     //stone3: PIXI.Texture.fromImage('img/stones/stone3.png'),
 
