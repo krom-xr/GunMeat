@@ -57,19 +57,50 @@ Bullet.prototype = {
         this.sprite.x = this.x0 + BULLET_SPEED * timediff * Math.sin(this.angle);
         this.sprite.y = this.y0 + BULLET_SPEED * timediff * Math.cos(this.angle);
     },
+    getStoneDots: function(stone) {
+        var it = this;
+        var far_dist = BULLET_DESTROY_RADIUS * 2;
+
+        var max_min = stoneManager.getMaxMinAngleDot(stone, it.sprite.x, it.sprite.y);
+        var far_dot1 = utils.getCoordByKxb({x: it.sprite.x, y: it.sprite.y}, {x: max_min.min.x, y: max_min.min.y}, far_dist);
+        var far_dot2 = utils.getCoordByKxb({x: it.sprite.x, y: it.sprite.y}, {x: max_min.max.x, y: max_min.max.y}, far_dist);
+
+        return [
+            {x: max_min.min.x, y: max_min.min.y, start: true},
+            {x: far_dot1.x, y: far_dot1.y},
+            {x: far_dot2.x, y: far_dot2.y},
+            {x: max_min.max.x, y: max_min.max.y},
+            {x: max_min.min.x, y: max_min.min.y}
+        ];
+    },
+    setMask: function(stones_arr) {
+        var it = this;
+        var line_dots = [];
+        _.each(stones_arr, function(stone) {
+            line_dots = line_dots.concat(it.getStoneDots(stone));
+        });
+
+        var trace = new createjs.Shape();
+        trace.graphics.beginStroke('rgba(0,0,0,1)');
+
+        _.each(line_dots, function(dot) {
+            dot.start ?
+                trace.graphics.moveTo(dot.x, dot.y) :
+                trace.graphics.lineTo(dot.x, dot.y);
+        });
+        trace.graphics
+            .moveTo(0, 0)
+            .lineTo(WIDTH, 0)
+            .lineTo(WIDTH, HEIGHT)
+            .lineTo(0, HEIGHT)
+            .lineTo(0, 0);
+
+        it.sprite.mask = trace;
+        //stage.addChild(trace);
+    },
     renderBoom: function() {
         var it = this;
         var wh = BULLET_DESTROY_RADIUS * 2;
-
-        //var trace = new createjs.Shape();
-        //trace.graphics.beginStroke('rgba(0,0,0,0)')
-            //.moveTo(10, 10).lineTo(100, 10).lineTo(100, 100).lineTo(10,100).lineTo(10,10)
-            //.moveTo(10, 110).lineTo(100, 110).lineTo(100, 210).lineTo(10, 210).lineTo(10, 110)
-            //.moveTo(0,0).lineTo(0, 800).lineTo(800, 800).lineTo(800, 0).lineTo(0, 0);
-
-        //trace.x = 300;
-        //trace.y = 200;
-        //this.sprite.mask = trace;
 
         it.animation_once(it.sprite, textures_sequence.boom, function(data) {
             if (data.finish) {
@@ -77,33 +108,11 @@ Bullet.prototype = {
                 return;
             }
 
-            var stone = stoneManager.stones[0];
-            var max_min = stoneManager.getMaxMinAngleDot(stone, it.sprite.x, it.sprite.y);
-            var far_dist = BULLET_DESTROY_RADIUS * 2;
-            //var far_dot1 = utils.getCoordByKxb({x: it.sprite.x, y: it.sprite.y}, {x: max_min.min.x, y: max_min.min.y}, far_dist);
-            //var far_dot2 = utils.getCoordByKxb({x: it.sprite.x, y: it.sprite.y}, {x: max_min.max.x, y: max_min.max.y}, far_dist);
+            var stone1 = stoneManager.stones[1];
+            var stone2 = stoneManager.stones[0];
+            var stones_arr = [stone1, stone2];
 
-            var far_dot1 = utils.getCoordByKxb({x: it.sprite.x, y: it.sprite.y}, {x: max_min.min.x, y: max_min.min.y}, far_dist);
-            var far_dot2 = utils.getCoordByKxb({x: it.sprite.x, y: it.sprite.y}, {x: max_min.max.x, y: max_min.max.y}, far_dist);
-
-            var trace = new createjs.Shape();
-            trace.graphics.beginStroke('rgba(0,0,0,1)')
-                .moveTo(max_min.min.x, max_min.min.y)
-                .lineTo(far_dot1.x, far_dot1.y)
-                .lineTo(far_dot2.x, far_dot2.y)
-                .lineTo(max_min.max.x, max_min.max.y)
-                .lineTo(max_min.min.x, max_min.min.y)
-                
-                .moveTo(0, 0)
-                .lineTo(600, 0)
-                .lineTo(600, 600)
-                .lineTo(0, 600)
-                .lineTo(0, 0)
-
-            it.sprite.mask = trace;
-            //stage.addChild(trace);
-
-
+            it.setMask(stoneManager.stones);
 
             //var hit_soldiers = [];
             //_.each(_.clone(soldierManager.getSoldiers()), function(soldier) {
@@ -358,9 +367,13 @@ var stoneManager = {
     init: function() {
         var stone1 = this.newStone(textures_static.stone1(), 300, 300);
         var stone2 = this.newStone(textures_static.stone1(), 500, 300);
+        var stone3 = this.newStone(textures_static.stone1(), 400, 200);
+        var stone4 = this.newStone(textures_static.stone1(), 400, 400);
 
         this.stones.push(stone1);
         this.stones.push(stone2);
+        this.stones.push(stone3);
+        this.stones.push(stone4);
 
         //var trace = new createjs.Shape();
         //trace.graphics.beginStroke("#000")
@@ -394,8 +407,8 @@ var stoneManager = {
     getDotsCoords: function(sprite) {
         var x = sprite.x;
         var y = sprite.y;
-        var half_w = sprite.width_by_scale/2;
-        var half_h = sprite.height_by_scale/2;
+        var half_w = sprite.width_by_scale/2 - 10;
+        var half_h = sprite.height_by_scale/2 - 10;
         return [{x: x - half_w, y: y - half_h}, {x: x + half_w, y: y - half_h}, {x: x + half_w, y: y + half_h}, {x: x - half_w, y: y + half_h}];
     },
 
@@ -404,7 +417,7 @@ var stoneManager = {
         var max_angle = -100000, min_angle = 10000, max_dot, min_dot;
         var y_max = -10000;
         _.each(dots, function(dot) { if (dot.y > y_max) { y_max = dot.y; }});
-        var reverse_flag = y > y_max; 
+        var reverse_flag = y > y_max;
 
         _.each(dots, function(dot) {
             var angle = reverse_flag ? utils.getAngle(dot, {x: x, y: y}) :  angle = utils.getAngle({x: x, y: y}, dot);
@@ -417,7 +430,7 @@ var stoneManager = {
                 min_dot = dot;
             }
         });
-        return {max: max_dot, min: min_dot}
+        return {max: max_dot, min: min_dot};
     },
     newStone: function(img, x, y) {
         var sprite = new createjs.Bitmap(img);
