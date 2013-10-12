@@ -78,22 +78,33 @@ Bullet.prototype = {
             }
 
             var stone = stoneManager.stones[0];
-            var dots = stoneManager.getDotsCoords(stone);
-            var max_angle = 0, min_angle = 10000, max_dot, min_dot;
-            _.each(dots, function(dot) {
-                var angle = utils.getAngle(dot, {x: it.sprite.x, y: it.sprite.y});
-                if (max_angle < angle) {
-                    max_angle = angle;
-                    max_dot = dot;
-                }
-                if (min_angle > angle) {
-                    min_angle = angle;
-                    min_dot = dot;
-                }
-            });
-            console.log(max_dot, min_dot);
+            var max_min = stoneManager.getMaxMinAngleDot(stone, it.sprite.x, it.sprite.y);
+            var far_dist = BULLET_DESTROY_RADIUS * 2;
+            //var far_dot1 = utils.getCoordByKxb({x: it.sprite.x, y: it.sprite.y}, {x: max_min.min.x, y: max_min.min.y}, far_dist);
+            //var far_dot2 = utils.getCoordByKxb({x: it.sprite.x, y: it.sprite.y}, {x: max_min.max.x, y: max_min.max.y}, far_dist);
 
-            throw new Error('stop');
+            var far_dot1 = utils.getCoordByKxb({x: it.sprite.x, y: it.sprite.y}, {x: max_min.min.x, y: max_min.min.y}, far_dist);
+            var far_dot2 = utils.getCoordByKxb({x: it.sprite.x, y: it.sprite.y}, {x: max_min.max.x, y: max_min.max.y}, far_dist);
+
+            var trace = new createjs.Shape();
+            trace.graphics.beginStroke('rgba(0,0,0,1)')
+                .moveTo(max_min.min.x, max_min.min.y)
+                .lineTo(far_dot1.x, far_dot1.y)
+                .lineTo(far_dot2.x, far_dot2.y)
+                .lineTo(max_min.max.x, max_min.max.y)
+                .lineTo(max_min.min.x, max_min.min.y)
+                
+                .moveTo(0, 0)
+                .lineTo(600, 0)
+                .lineTo(600, 600)
+                .lineTo(0, 600)
+                .lineTo(0, 0)
+
+            it.sprite.mask = trace;
+            //stage.addChild(trace);
+
+
+
             //var hit_soldiers = [];
             //_.each(_.clone(soldierManager.getSoldiers()), function(soldier) {
                 //var hit = utils.dotInRadius(it.sprite.position, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS);
@@ -363,20 +374,21 @@ var stoneManager = {
         //stone1.mask = trace;
 
         //stage.addChild(trace);
-        console.log('top');
-        this.getMaxMinAngle(stone1, 300, 200);
+        
+        //console.log('top');
+        //this.getMaxMinAngle(stone1, 300, 200);
 
-        console.log('right');
-        this.getMaxMinAngle(stone1, 400, 300);
+        //console.log('right');
+        //this.getMaxMinAngle(stone1, 400, 300);
 
-        console.log('bottom');
-        this.getMaxMinAngle(stone1, 300, 500);
+        //console.log('bottom');
+        //this.getMaxMinAngle(stone1, 300, 500);
 
-        console.log('left');
-        this.getMaxMinAngle(stone1, 200, 300);
+        //console.log('left');
+        //this.getMaxMinAngle(stone1, 200, 300);
 
-        console.log('other');
-        this.getMaxMinAngle(stone1, 500, 500);
+        //console.log('other');
+        //this.getMaxMinAngle(stone1, 500, 500);
 
     },
     getDotsCoords: function(sprite) {
@@ -387,7 +399,7 @@ var stoneManager = {
         return [{x: x - half_w, y: y - half_h}, {x: x + half_w, y: y - half_h}, {x: x + half_w, y: y + half_h}, {x: x - half_w, y: y + half_h}];
     },
 
-    getMaxMinAngle: function(sprite, x, y) {
+    getMaxMinAngleDot: function(sprite, x, y) {
         var dots = stoneManager.getDotsCoords(sprite);
         var max_angle = -100000, min_angle = 10000, max_dot, min_dot;
         var y_max = -10000;
@@ -396,7 +408,6 @@ var stoneManager = {
 
         _.each(dots, function(dot) {
             var angle = reverse_flag ? utils.getAngle(dot, {x: x, y: y}) :  angle = utils.getAngle({x: x, y: y}, dot);
-            console.log(angle.toGrad());
             if (max_angle < angle) {
                 max_angle = angle;
                 max_dot = dot;
@@ -406,7 +417,7 @@ var stoneManager = {
                 min_dot = dot;
             }
         });
-        console.log(min_dot, max_dot);
+        return {max: max_dot, min: min_dot}
     },
     newStone: function(img, x, y) {
         var sprite = new createjs.Bitmap(img);

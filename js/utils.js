@@ -196,7 +196,36 @@ utils.dotInRect = function(rect, dot) {
     return true;
 };
 
+utils.getCoordByKxb2 = function(dot1, dot2, length) {
+    var length_between_dots = utils.getLength(dot1, dot2);
+    if (length_between_dots < length) {
+        dot2.x = dot2.x * 10; 
+        dot2.y = dot2.y * 10;
+        utils.getCoordByKxb2(dot1, dot2, length);
+    }
+    var x = dot1.x + (dot2.x - dot1.x)/2;
+    var y = dot1.y + (dot2.y - dot1.y)/2;
+    if (x === 0) { return {x: dot1.x, y: dot1.y + length}; }
+    if (y === 0) { return {x: dot1.x + length, y: dot1.y}; }
+
+    var length_possible = utils.getLength(dot1, {x:x, y:y});
+    if (Math.abs(length_possible - length) < 1) { return {x: x, y: y}; }
+
+    if (length_possible > length) {
+        return utils.getCoordByKxb(dot1, {x:x, y:y}, length);
+    }
+    if (length_possible < length) {
+        return utils.getCoordByKxb({x:x, y:y}, dot2, length - length_possible);
+    }
+};
+
 utils.getCoordByKxb = function(dot1, dot2, length) {
+    var length_between_dots = utils.getLength(dot1, dot2);
+    if (length_between_dots < length) {
+        var x3 = dot2.x > dot1.x ? dot2.x + 100 : dot2.x - 100;
+        var y3 = (dot2.y - dot1.y) * (x3 - dot1.x)/(dot2.x - dot1.x) + dot1.y;
+        return utils.getCoordByKxb(dot1, {x: x3, y: y3}, length);
+    }
     var x = dot1.x + (dot2.x - dot1.x)/2;
     var y = dot1.y + (dot2.y - dot1.y)/2;
     if (x === 0) { return {x: dot1.x, y: dot1.y + length}; }
