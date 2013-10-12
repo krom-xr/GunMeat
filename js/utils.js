@@ -173,6 +173,11 @@ utils.getAngleAndLength = function(start_coord, stop_coord) {
 
     return {angle: angle, length: length};
 };
+utils.getAngle = function(start_coord, stop_coord) {
+    return utils.getAngleAndLength(start_coord, stop_coord).angle;
+};
+
+
 utils.getLength = function(start_coord, stop_coord) {
     return Math.sqrt(Math.pow(start_coord.x - stop_coord.x, 2) + Math.pow(start_coord.y - stop_coord.y, 2));
 };
@@ -211,10 +216,10 @@ utils.getCoordByKxb = function(dot1, dot2, length) {
 utils.setWHForEasel = function(easel_bmp, w, h) {
     var orig_w = easel_bmp.image.width;
     var orig_h = easel_bmp.image.height;
-    var scale_w = w/orig_w; 
+    var scale_w = w/orig_w;
     var scale_h = h/orig_h;
-    easel_bmp.width = w;
-    easel_bmp.height = h;
+    easel_bmp.width_by_scale = w;
+    easel_bmp.height_by_scale = h;
     easel_bmp.scaleX = scale_w;
     easel_bmp.scaleY = scale_h;
-}
+};

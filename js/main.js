@@ -60,15 +60,40 @@ Bullet.prototype = {
     renderBoom: function() {
         var it = this;
         var wh = BULLET_DESTROY_RADIUS * 2;
-        utils.setWHForEasel(this.sprite, wh, wh);
-        //this.sprite.width = BULLET_DESTROY_RADIUS * 2;
-        //this.sprite.height = BULLET_DESTROY_RADIUS * 2;
 
-        it.animation_once(this.sprite, textures_sequence.boom, function(data) {
+        //var trace = new createjs.Shape();
+        //trace.graphics.beginStroke('rgba(0,0,0,0)')
+            //.moveTo(10, 10).lineTo(100, 10).lineTo(100, 100).lineTo(10,100).lineTo(10,10)
+            //.moveTo(10, 110).lineTo(100, 110).lineTo(100, 210).lineTo(10, 210).lineTo(10, 110)
+            //.moveTo(0,0).lineTo(0, 800).lineTo(800, 800).lineTo(800, 0).lineTo(0, 0);
+
+        //trace.x = 300;
+        //trace.y = 200;
+        //this.sprite.mask = trace;
+
+        it.animation_once(it.sprite, textures_sequence.boom, function(data) {
             if (data.finish) {
                 it.killSelf();
                 return;
             }
+
+            var stone = stoneManager.stones[0];
+            var dots = stoneManager.getDotsCoords(stone);
+            var max_angle = 0, min_angle = 10000, max_dot, min_dot;
+            _.each(dots, function(dot) {
+                var angle = utils.getAngle(dot, {x: it.sprite.x, y: it.sprite.y});
+                if (max_angle < angle) {
+                    max_angle = angle;
+                    max_dot = dot;
+                }
+                if (min_angle > angle) {
+                    min_angle = angle;
+                    min_dot = dot;
+                }
+            });
+            console.log(max_dot, min_dot);
+
+            throw new Error('stop');
             //var hit_soldiers = [];
             //_.each(_.clone(soldierManager.getSoldiers()), function(soldier) {
                 //var hit = utils.dotInRadius(it.sprite.position, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS);
@@ -123,6 +148,7 @@ Bullet.prototype = {
 
 
         }, 0);
+        utils.setWHForEasel(it.sprite, wh, wh); // если подставить перед animantion_once - то происходит какой-то глюк - строб в начале взрыва
 
     },
     killSelf: function() { helper.killSelf(this); },
@@ -215,7 +241,7 @@ var Soldier = function(x, y, angle) {
     document.addEventListener('PointerDown', function(e) {
         e.stopPropagation(); e.preventDefault();
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: it.sprite.x, y: it.sprite.y});
-        if (is_near < 50) { 
+        if (is_near < 50) {
             it.pointerId = e.pointerId;
             it.dots = [];
         }
@@ -319,20 +345,80 @@ var soldierManager = {
 
 var stoneManager = {
     init: function() {
-        this.newStone(textures_static.stone1(), 300, 300);
+        var stone1 = this.newStone(textures_static.stone1(), 300, 300);
+        var stone2 = this.newStone(textures_static.stone1(), 500, 300);
 
+        this.stones.push(stone1);
+        this.stones.push(stone2);
+
+        //var trace = new createjs.Shape();
+        //trace.graphics.beginStroke("#000")
+            //.moveTo(10, 10).lineTo(100, 10).lineTo(100, 100).lineTo(10,100).lineTo(10,10)
+            //.moveTo(10, 110).lineTo(100, 110).lineTo(100, 210).lineTo(10, 210).lineTo(10, 110)
+            //.moveTo(0,0).lineTo(0, 800).lineTo(800, 800).lineTo(800, 0).lineTo(0, 0);
+
+        //trace.x = 300;
+        //trace.y = 200;
+
+        //stone1.mask = trace;
+
+        //stage.addChild(trace);
+        console.log('top');
+        this.getMaxMinAngle(stone1, 300, 200);
+
+        console.log('right');
+        this.getMaxMinAngle(stone1, 400, 300);
+
+        console.log('bottom');
+        this.getMaxMinAngle(stone1, 300, 500);
+
+        console.log('left');
+        this.getMaxMinAngle(stone1, 200, 300);
+
+        console.log('other');
+        this.getMaxMinAngle(stone1, 500, 500);
+
+    },
+    getDotsCoords: function(sprite) {
+        var x = sprite.x;
+        var y = sprite.y;
+        var half_w = sprite.width_by_scale/2;
+        var half_h = sprite.height_by_scale/2;
+        return [{x: x - half_w, y: y - half_h}, {x: x + half_w, y: y - half_h}, {x: x + half_w, y: y + half_h}, {x: x - half_w, y: y + half_h}];
+    },
+
+    getMaxMinAngle: function(sprite, x, y) {
+        var dots = stoneManager.getDotsCoords(sprite);
+        var max_angle = -100000, min_angle = 10000, max_dot, min_dot;
+        var y_max = -10000;
+        _.each(dots, function(dot) { if (dot.y > y_max) { y_max = dot.y; }});
+        var reverse_flag = y > y_max; 
+
+        _.each(dots, function(dot) {
+            var angle = reverse_flag ? utils.getAngle(dot, {x: x, y: y}) :  angle = utils.getAngle({x: x, y: y}, dot);
+            console.log(angle.toGrad());
+            if (max_angle < angle) {
+                max_angle = angle;
+                max_dot = dot;
+            }
+            if (min_angle > angle) {
+                min_angle = angle;
+                min_dot = dot;
+            }
+        });
+        console.log(min_dot, max_dot);
     },
     newStone: function(img, x, y) {
         var sprite = new createjs.Bitmap(img);
         stage.addChild(sprite);
         sprite.image.after_load(function() {
-            spr = sprite;
             sprite.regX  = sprite.image.width * 0.5;
             sprite.regY = sprite.image.height * 0.5;
             sprite.x = x;
             sprite.y = y;
             utils.setWHForEasel(sprite, 100, 100);
         });
+        return sprite;
     },
     stones: [],
 };
