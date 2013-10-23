@@ -80,7 +80,11 @@ utils.clear_undefined = function(params_dict) {
 };
 
 /* удаляет элемент из массива */
-utils.removeElFromArray = function (el, arr) { arr.splice($.inArray(el, arr), 1); return arr; };
+utils.removeElFromArray = function (el, arr) { 
+    var index = $.inArray(el, arr);
+    if (index !== -1) { arr.splice(index, 1); }
+    return arr; 
+};
 
 /* пытается преобразовать данные в json,
  * если получает объект то возвращается объект,
