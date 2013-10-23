@@ -84,19 +84,19 @@ Bullet.prototype = {
             {x: max_min.min.x, y: max_min.min.y}
         ];
     },
-    setMask: function(stones_arr) {
+    getMaskDots: function(stones_arr) {
         var it = this;
         var line_dots = [];
         _.each(stones_arr, function(stone) {
             line_dots = line_dots.concat(it.getStoneDots(stone));
         });
-
+        return line_dots;
+    },
+    setMask: function(mask_dots) {
         var trace = new createjs.Shape();
         trace.graphics.beginStroke('rgba(0,0,0,1)');
 
-        console.log(line_dots);
-
-        _.each(line_dots, function(dot) {
+        _.each(mask_dots, function(dot) {
             dot.start ?
                 trace.graphics.moveTo(dot.x, dot.y) :
                 trace.graphics.lineTo(dot.x, dot.y);
@@ -108,8 +108,38 @@ Bullet.prototype = {
             .lineTo(0, HEIGHT)
             .lineTo(0, 0);
 
-        it.sprite.mask = trace;
-        //stage.addChild(trace);
+        this.sprite.mask = trace;
+
+    },
+    hitSoldiers: function() {
+        var it = this;
+        var hit_soldiers = [];
+        _.each(soldierManager.getSoldiers(), function(soldier) {
+            var hit = utils.dotInRadius({x: it.sprite.x, y: it.sprite.y}, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS);
+            hit && hit_soldiers.push(soldier);
+        });
+        return hit_soldiers;
+    },
+    checkKill: function(soldier, mask_dots) {
+        if (soldier.is_dead) { return true; }
+        var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
+        canvas.width = WIDTH; canvas.height = HEIGHT;
+
+        _.each(mask_dots, function(dot) {
+            dot.start ?
+                ctx.moveTo(dot.x, dot.y) :
+                ctx.lineTo(dot.x, dot.y);
+        });
+        ctx.fillStyle = "black";
+        ctx.fill();
+
+        var im_data = ctx.getImageData(soldier.sprite.x, soldier.sprite.y, 1, 1).data;
+        if (!im_data[3]) {
+            soldier.is_dead = true;
+            soldier.killSelf();
+            console.log('soldier killed');
+        }
     },
     renderBoom: function() {
         var it = this;
@@ -125,13 +155,13 @@ Bullet.prototype = {
             var stone2 = stoneManager.stones[0];
             var stones_arr = [stone1, stone2];
 
-            it.setMask(stoneManager.stones);
+            var mask_dots = it.getMaskDots(stoneManager.stones);
+            it.setMask(mask_dots);
 
-            //var hit_soldiers = [];
-            //_.each(_.clone(soldierManager.getSoldiers()), function(soldier) {
-                //var hit = utils.dotInRadius(it.sprite.position, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS);
-                //hit && hit_soldiers.push(soldier);
-            //});
+            var hit_soldiers = it.hitSoldiers();
+            _.each(hit_soldiers, function(soldier) {
+                it.checkKill(soldier, mask_dots);
+            });
             //var hit_stones = [];
             //_.each(stoneManager.stones, function(stone) {
                 //var hit = utils.dotInRadius(it.sprite.position, stone.position, BULLET_DESTROY_RADIUS);
@@ -311,7 +341,7 @@ Soldier.prototype = {
         soldierManager.killSoldier(this);
         helper.killSelf(this);
     },
-    getCurrentCoord: function() { return {x: this.sprite.position.x, y: this.sprite.position.y}; },
+    getCurrentCoord: function() { return {x: this.sprite.x, y: this.sprite.y}; },
     setDotLengths: function(dots) {
         _.each(dots, function(dot, i) {
             if (i === 0) { dot.current_length = 0; return; }
