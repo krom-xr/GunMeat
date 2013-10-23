@@ -120,26 +120,28 @@ Bullet.prototype = {
         });
         return hit_soldiers;
     },
-    checkKill: function(soldier, mask_dots) {
-        if (soldier.is_dead) { return true; }
-        var canvas = document.createElement('canvas');
-        var ctx = canvas.getContext('2d');
-        canvas.width = WIDTH; canvas.height = HEIGHT;
+    killSoldiers: function(soldiers, mask_dots) {
+        var canvas, ctx;
+        _.each(soldiers, function(soldier) {
+            if (soldier.is_dead) { return; }
+            if (!canvas) {
+                canvas = document.createElement('canvas');
+                ctx = canvas.getContext('2d');
+                canvas.width = WIDTH; canvas.height = HEIGHT;
 
-        _.each(mask_dots, function(dot) {
-            dot.start ?
-                ctx.moveTo(dot.x, dot.y) :
-                ctx.lineTo(dot.x, dot.y);
+                _.each(mask_dots, function(dot) {
+                    dot.start ?
+                        ctx.moveTo(dot.x, dot.y) :
+                        ctx.lineTo(dot.x, dot.y);
+                });
+                ctx.fillStyle = "black"; ctx.fill();
+            }
+
+            var im_data = ctx.getImageData(soldier.sprite.x, soldier.sprite.y, 1, 1).data;
+            if (!im_data[3]) {
+                soldier.killSelf();
+            }
         });
-        ctx.fillStyle = "black";
-        ctx.fill();
-
-        var im_data = ctx.getImageData(soldier.sprite.x, soldier.sprite.y, 1, 1).data;
-        if (!im_data[3]) {
-            soldier.is_dead = true;
-            soldier.killSelf();
-            console.log('soldier killed');
-        }
     },
     renderBoom: function() {
         var it = this;
@@ -150,65 +152,9 @@ Bullet.prototype = {
                 it.killSelf();
                 return;
             }
-
-            var stone1 = stoneManager.stones[1];
-            var stone2 = stoneManager.stones[0];
-            var stones_arr = [stone1, stone2];
-
             var mask_dots = it.getMaskDots(stoneManager.stones);
             it.setMask(mask_dots);
-
-            var hit_soldiers = it.hitSoldiers();
-            _.each(hit_soldiers, function(soldier) {
-                it.checkKill(soldier, mask_dots);
-            });
-            //var hit_stones = [];
-            //_.each(stoneManager.stones, function(stone) {
-                //var hit = utils.dotInRadius(it.sprite.position, stone.position, BULLET_DESTROY_RADIUS);
-                //hit && hit_stones.push(stone);
-            //});
-
-
-
-            //_.each(hit_stones, function(stone) {
-                //var rect1 = {x: stone.position.x - stone.width/2, y: 0, w: stone.width, h: renderer.height};
-                //var rect2 = {x: 0, y: stone.position.y - stone.height/2, w: renderer.width, h: stone.height};
-                ////rect.drawRect
-                
-                //it.setBulletMask(it.sprite, stone);
-
-                ////if (!stone.rect_mask) {
-                    ////var rect = new PIXI.Graphics();
-                    ////stone.rect_mask = rect;
-                    //////rect.moveTo(10, 10);
-
-                    ////rect.beginFill(0x0000FF, 0.1);
-                    ////rect.drawRect(stone.position.x - 400, stone.position.y + 40, 1800, 800);
-
-                    //////stage.addChild(rect);
-                    //////it.sprite.mask = rect;
-
-                    ////var container = new PIXI.DisplayObjectContainer();
-                    ////stage.addChild(container);
-
-                    ////container.addChild(it.sprite);
-                    ////container.mask = rect;
-
-                    //////zcont.mask = rect;
-                    
-                ////}
-                ////if (stone.rect_mask) {
-                    //////it.sprite.mask = stone.rect_mask;
-                    ////stone.rect_mask.beginFill(0x0000FF, 1);
-                    ////stone.rect_mask.drawCircle(stone.position.x, stone.position.y, 5);
-
-                ////}
-
-                
-
-
-            //});
-
+            it.killSoldiers(it.hitSoldiers(), mask_dots);
 
         }, 0);
         utils.setWHForEasel(it.sprite, wh, wh); // если подставить перед animantion_once - то происходит какой-то глюк - строб в начале взрыва
@@ -338,6 +284,7 @@ var Soldier = function(x, y, angle) {
 
 Soldier.prototype = {
     killSelf: function() {
+        this.is_dead = true;
         soldierManager.killSoldier(this);
         helper.killSelf(this);
     },
