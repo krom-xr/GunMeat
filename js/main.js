@@ -59,17 +59,28 @@ Bullet.prototype = {
     },
     getStoneDots: function(stone) {
         var it = this;
-        var far_dist = BULLET_DESTROY_RADIUS * 2;
+        var far_dist = BULLET_DESTROY_RADIUS * 125;
+
+        var stone_dots = stoneManager.getVertices(stone);
 
         var max_min = stoneManager.getMaxMinAngleDot(stone, it.sprite.x, it.sprite.y);
         var far_dot1 = utils.getCoordByKxb({x: it.sprite.x, y: it.sprite.y}, {x: max_min.min.x, y: max_min.min.y}, far_dist);
         var far_dot2 = utils.getCoordByKxb({x: it.sprite.x, y: it.sprite.y}, {x: max_min.max.x, y: max_min.max.y}, far_dist);
+
+        var third_vertice;
+        _.each(stone_dots, function(dot, i) {
+            if (dot.x === max_min.min.x && dot.y === max_min.min.y) {
+                third_vertice = stone_dots[i + 1];
+                if (!third_vertice) { third_vertice = stone_dots[0]; }
+            }
+        });
 
         return [
             {x: max_min.min.x, y: max_min.min.y, start: true},
             {x: far_dot1.x, y: far_dot1.y},
             {x: far_dot2.x, y: far_dot2.y},
             {x: max_min.max.x, y: max_min.max.y},
+            {x: third_vertice.x, y: third_vertice.y},
             {x: max_min.min.x, y: max_min.min.y}
         ];
     },
@@ -82,6 +93,8 @@ Bullet.prototype = {
 
         var trace = new createjs.Shape();
         trace.graphics.beginStroke('rgba(0,0,0,1)');
+
+        console.log(line_dots);
 
         _.each(line_dots, function(dot) {
             dot.start ?
@@ -366,9 +379,9 @@ var soldierManager = {
 var stoneManager = {
     init: function() {
         var stone1 = this.newStone(textures_static.stone1(), 300, 300);
-        var stone2 = this.newStone(textures_static.stone1(), 500, 300);
-        var stone3 = this.newStone(textures_static.stone1(), 400, 200);
-        var stone4 = this.newStone(textures_static.stone1(), 400, 400);
+        var stone2 = this.newStone(textures_static.stone2(), 500, 300);
+        var stone3 = this.newStone(textures_static.stone3(), 400, 200);
+        var stone4 = this.newStone(textures_static.stone2(), 400, 400);
 
         this.stones.push(stone1);
         this.stones.push(stone2);
@@ -404,7 +417,7 @@ var stoneManager = {
         //this.getMaxMinAngle(stone1, 500, 500);
 
     },
-    getDotsCoords: function(sprite) {
+    getVertices: function(sprite) {
         var x = sprite.x;
         var y = sprite.y;
         var half_w = sprite.width_by_scale/2 - 10;
@@ -413,7 +426,7 @@ var stoneManager = {
     },
 
     getMaxMinAngleDot: function(sprite, x, y) {
-        var dots = stoneManager.getDotsCoords(sprite);
+        var dots = stoneManager.getVertices(sprite);
         var max_angle = -100000, min_angle = 10000, max_dot, min_dot;
         var y_max = -10000;
         _.each(dots, function(dot) { if (dot.y > y_max) { y_max = dot.y; }});
