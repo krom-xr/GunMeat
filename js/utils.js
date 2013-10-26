@@ -1,4 +1,7 @@
 /*global _*/
+if (typeof global !== 'undefined') {
+    window._ = global._;
+}
 var utils = {};
 /*
  * возвращает значение гет параметра из урл адреса.
