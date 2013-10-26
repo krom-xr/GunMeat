@@ -427,53 +427,6 @@ var stoneManager = {
 };
 
 
-var inverseGrOb = function(inverse, area_w, area_h) {
-    var x = 0, y = 1;
-    var xmax = 0, xmin = 10000000;
-    var path = [];
-    for (var i = 0; i < inverse.currentPath.points.length; i+=2) {
-        path.push([inverse.currentPath.points[i], inverse.currentPath.points[i + 1]]);
-    }
-    inverse.clear();
-
-    _.each(path, function(dot) { if (xmax < dot[0]) { xmax = dot[0]; } });
-    _.each(path, function(dot) { if (xmin > dot[0]) { xmin = dot[0]; } });
-
-    inverse.beginFill("0x00FF00", 1);
-    inverse.moveTo(xmin, 0);
-    inverse.lineTo(0, 0);
-    inverse.lineTo(0, area_h);
-    inverse.lineTo(xmin, area_h);
-    inverse.lineTo(xmin, 0);
-
-    inverse.beginFill("0x00FFff", 1);
-    inverse.moveTo(xmax, 0);
-    inverse.lineTo(xmax, area_h);
-    inverse.lineTo(area_w, area_h);
-    inverse.lineTo(area_w, 0);
-    inverse.lineTo(xmax, 0);
-
-    _.each(path, function(dot, i) {
-        var dot2 = path[i + 1];
-        if (!dot2) { return false; }
-
-        if (dot[x] < dot2[x]) {
-            inverse.beginFill("0xfff000");
-            inverse.moveTo(dot[x], dot[y]);
-            inverse.lineTo(dot[x], 0);
-            inverse.lineTo(dot2[x], 0);
-            inverse.lineTo(dot2[x], dot2[y]);
-            inverse.lineTo(dot[x], dot[y]);
-        } else {
-            inverse.beginFill("0xfff000");
-            inverse.moveTo(dot[x], dot[y]);
-            inverse.lineTo(dot[x], area_h);
-            inverse.lineTo(dot2[x], area_h);
-            inverse.lineTo(dot2[x], dot2[y]);
-            inverse.lineTo(dot[x], dot[y]);
-        }
-    });
-};
 
 
 $(document).ready(function() {
@@ -487,5 +440,8 @@ $(document).ready(function() {
 });
 
 
+$(document).on('contextmenu', function(e) {
+    e.preventDefault(); e.stopPropagation();
+});
 
 
