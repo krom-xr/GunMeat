@@ -22,7 +22,10 @@ var helper = {
         return {ctx: ctx, canvas: canvas};
     },
     getStonesMapImg: function(callback) {
-        if (this._stones_map_img) { return this._stones_map_img; }
+        if (this._stones_map_img == 'wait') { return; }
+        if (this._stones_map_img) { callback(this._stones_map_img); return; }
+        this._stones_map_img = 'wait';
+        var it = this;
         var canv = helper.getSpecialCanvas();
         canv.ctx.fillStyle = 'red';
         canv.ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -34,9 +37,11 @@ var helper = {
         });
         canv.ctx.fill();
         var img = new Image();
+        img.onload = function() {
+            it._stones_map_img = img;
+            callback(it._stones_map_img);
+        }
         img.src = canv.canvas.toDataURL();
-        this._stones_map_img = img;
-        return this._stones_map_img;
     }
 };
 
@@ -271,6 +276,7 @@ var Soldier = function(x, y, angle) {
 
     var draw = false;
 
+    var checkStoneIntersect = _.throttle(it.checkStoneIntersect, 50);
     document.addEventListener('PointerDown', function(e) {
         e.stopPropagation(); e.preventDefault();
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: it.sprite.x, y: it.sprite.y});
@@ -288,9 +294,13 @@ var Soldier = function(x, y, angle) {
     document.addEventListener('PointerMove', function(e) {
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
         var x = e.clientX, y = e.clientY;
-        it.dots.push({x: x, y: y});
+        var dot = {x: x, y: y};
+        var prev_dot = it.dots[it.dots.length - 1];
+        var last_dots = [prev_dot, dot];
+        it.dots.push(dot);
         it.trace.graphics.lineTo(x, y);
-        it.checkStoneIntersect(it.dots, stoneManager.stones);
+
+        checkStoneIntersect(it.dots, stoneManager.stones);
     }, false);
     document.addEventListener('PointerUp', function(e) {
         if (it.pointerId === e.pointerId) {
@@ -319,33 +329,49 @@ var Soldier = function(x, y, angle) {
 
 Soldier.prototype = {
     checkStoneIntersect: function(dots, stones) {
-        var canv = helper.getSpecialCanvas();
-        canv.ctx.fillStyle = 'red';
-        canv.ctx.fillRect(0, 0, WIDTH, HEIGHT);
-        canv.ctx.fillStyle = 'black';
-        _.each(stoneManager.stones, function(stone) {
-            _.each(stoneManager.getVertices(stone), function(dot, i) {
-                i ? canv.ctx.lineTo(dot.x, dot.y) : canv.ctx.moveTo(dot.x, dot.y);
-            });
-        });
-        canv.ctx.fill();
-        im_before = canv.canvas.toDataURL();
+        var it = this;
+        helper.getStonesMapImg(function(img) {
+            if (!it.line_canv) {
+                it.line_canv = helper.getSpecialCanvas();
+                it.line_canv.ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
+                it.line_canv.ctx.strokeStyle = 'red';
+            }
 
-
-        canv2 = helper.getSpecialCanvas();
-        img = new Image();
-        img.src = im_before;
-        img.onload = function() {
-            canv2.ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
-
-            canv2.ctx.strokeStyle = 'red';
             _.each(dots, function(dot, i) {
-                i ? canv2.ctx.lineTo(dot.x, dot.y) : canv2.ctx.moveTo(dot.x, dot.y);
+                if (dot.stone_intersect_checked) { return; }
+                i ? it.line_canv.ctx.lineTo(dot.x, dot.y) : it.line_canv.ctx.moveTo(dot.x, dot.y);
+                dot.stone_intersect_checked = true;
             });
-            canv2.ctx.stroke();
-            im_after = canv2.canvas.toDataURL();
-            console.log(im_before == im_after);
-        }
+            it.line_canv.ctx.stroke();
+            console.time('one');
+            im_after = it.line_canv.canvas.toDataURL();
+            console.timeEnd('one');
+
+            console.time('two');
+            im_after = it.line_canv.ctx.getImageData(0,0, WIDTH, HEIGHT);
+            console.timeEnd('two');
+
+
+            console.log(img.src == im_after);
+            //
+            test = it.line_canv;
+        });
+
+
+        //canv2 = helper.getSpecialCanvas();
+        //img = new Image();
+        //img.src = im_before;
+        //img.onload = function() {
+            //canv2.ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
+
+            //canv2.ctx.strokeStyle = 'red';
+            //_.each(dots, function(dot, i) {
+                //i ? canv2.ctx.lineTo(dot.x, dot.y) : canv2.ctx.moveTo(dot.x, dot.y);
+            //});
+            //canv2.ctx.stroke();
+            //im_after = canv2.canvas.toDataURL();
+            //console.log(im_before == im_after);
+        //}
 
 
         
@@ -363,8 +389,8 @@ Soldier.prototype = {
         //console.log(im_after === im_before);
         ////console.log(im_after); 
         ////console.log(im_before);
-        canvas = canv.canvas;
-        ctx = canv.ctx;
+        //canvas = canv.canvas;
+        //ctx = canv.ctx;
 
         //$('body').append(canv.canvas);
     },
