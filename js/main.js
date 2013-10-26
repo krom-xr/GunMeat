@@ -13,22 +13,14 @@ var helper = {
             }
 
         }, 500);
-    }
+    },
+    getSpecialCanvas: function() {
+        var canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+        canvas.width = WIDTH; canvas.height = HEIGHT;
+        ctx.fillStyle = "black"; 
+        return {ctx: ctx, canvas: canvas};
+    },
 };
-
-//var setBulletMask = function(bullet, stone) {
-    //if (!bullet.mask_container) {
-        //var container = new PIXI.DisplayObjectContainer();
-        //stage.addChild(container);
-        //container.addChild(bullet);
-        //var mask = new PIXI.Graphics();
-        //mask.beginFill(0x0000FF, 1);
-        //mask.drawRect(stone.position.x - 400, stone.position.y + 40, 1800, 800);
-        //container.mask = mask;
-        //bullet.mask_container = container;
-    //}
-//};
-
 
 var Bullet = function(angle, x, y, distance) {
     //var sprite = new PIXI.Sprite(textures_static.bullet);
@@ -118,27 +110,41 @@ Bullet.prototype = {
 
     },
     killSoldiers: function(soldiers, mask_dots) {
-        var canvas, ctx;
+        var canvas, ctx, canv;
+        
         _.each(soldiers, function(soldier) {
             if (soldier.is_dead) { return; }
             if (!canvas) {
-                canvas = document.createElement('canvas');
-                ctx = canvas.getContext('2d');
-                canvas.width = WIDTH; canvas.height = HEIGHT;
+                canv = helper.getSpecialCanvas();
 
                 _.each(mask_dots, function(dot) {
                     dot.start ?
-                        ctx.moveTo(dot.x, dot.y) :
-                        ctx.lineTo(dot.x, dot.y);
+                        canv.ctx.moveTo(dot.x, dot.y) :
+                        canv.ctx.lineTo(dot.x, dot.y);
                 });
-                ctx.fillStyle = "black"; ctx.fill();
+                canv.ctx.fillStyle = "black"; canv.ctx.fill();
             }
 
-            var im_data = ctx.getImageData(soldier.sprite.x, soldier.sprite.y, 1, 1).data;
+            var im_data = canv.ctx.getImageData(soldier.sprite.x, soldier.sprite.y, 1, 1).data;
             if (!im_data[3]) {
                 soldier.killSelf();
             }
         });
+    },
+    boomOnStone: function() {
+        if (this.on_stone !== undefined) { return this.on_stone; }
+        var it = this;
+        var canv = helper.getSpecialCanvas();
+        _.each(stoneManager.stones, function(stone) {
+            _.each(stoneManager.getVertices(stone), function(dot, i) {
+                i ? canv.ctx.lineTo(dot.x, dot.y) : canv.ctx.moveTo(dot.x, dot.y);
+            });
+        });
+        canv.ctx.fill();
+
+        var im_data = canv.ctx.getImageData(it.sprite.x, it.sprite.y, 1, 1).data;
+        it.on_stone = !!im_data[3];
+        return it.on_stone;
     },
     renderBoom: function() {
         var it = this;
@@ -149,6 +155,9 @@ Bullet.prototype = {
                 it.killSelf();
                 return;
             }
+
+            if (it.boomOnStone()) { return; }
+
             var mask_dots = it.getMaskDots(stoneManager.stones);
             it.setMask(mask_dots);
             it.killSoldiers(it.hitSoldiers(), mask_dots);
@@ -162,9 +171,6 @@ Bullet.prototype = {
 
         var xlen = Math.abs(this.sprite.x - this.x0);
         var ylen = Math.abs(this.sprite.y - this.y0);
-        console.log(this.sprite.x, this.x0);
-        //console.log(xlen, ylen);
-        //console.log('dist', this.distance);
         return (xlen * xlen + ylen * ylen) >= this.distance * this.distance;
     },
     setBulletMask: function(bullet, stone) {
@@ -248,21 +254,16 @@ var Soldier = function(x, y, angle) {
 
     var draw = false;
 
-
-
-    //trace = new createjs.Shape();
-    //trace.graphics.beginStroke('rgba(10,10,10,1)');
-    //stage.addChild(trace);
-
     document.addEventListener('PointerDown', function(e) {
         e.stopPropagation(); e.preventDefault();
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: it.sprite.x, y: it.sprite.y});
         if (is_near < 50) {
-            console.log('test');
-            console.log(e.pointerId);
 
-            //trace.graphics.moveTo(e.clientX, e.clientY);
-
+            var trace = new createjs.Shape();
+            trace.graphics.beginStroke('rgba(10,10,10,1)');
+            trace.graphics.moveTo(e.clientX, e.clientY);
+            stage.addChild(trace);
+            it.trace = trace;
             it.pointerId = e.pointerId;
             it.dots = [];
         }
@@ -270,10 +271,7 @@ var Soldier = function(x, y, angle) {
     document.addEventListener('PointerMove', function(e) {
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
         var x = e.clientX, y = e.clientY;
-
-            console.log('move');
-        
-        //trace.graphics.lineTo(x, y);
+        it.trace.graphics.lineTo(x, y);
 
         it.dots.push({x: x, y: y});
     }, false);
@@ -440,8 +438,6 @@ $(document).ready(function() {
 });
 
 
-$(document).on('contextmenu', function(e) {
-    e.preventDefault(); e.stopPropagation();
-});
+$(document).on('contextmenu', function(e) { e.preventDefault(); e.stopPropagation(); });
 
 

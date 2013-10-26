@@ -2,11 +2,6 @@
 Number.prototype.toRad = function () { return this * Math.PI / 180; }; // градусы в радианы например: (90).toRad();
 Number.prototype.toGrad = function() { return this * 180 / Math.PI; }; // радианы в градусы
 var WIDTH, HEIGHT, stage;
-
-//var interactive = true;
-//var stage = new PIXI.Stage(0xEEEEEE, interactive);
-//var renderer;
-
 var RENDER_ITEMS = [];
 
 var animation = {
@@ -71,17 +66,17 @@ $(document).ready(function() {
         //stage.update(event); 
     //});
 
-    //requestAnimationFrame(animate);
-    //function animate() {
-        //requestAnimationFrame(animate);
-        //animation.render(); 
-        //stage.update(); 
+    requestAnimationFrame(animate);
+    function animate() {
+        requestAnimationFrame(animate);
+        animation.render(); 
+        stage.update(); 
 
-    //}
-    setInterval(function() {
-        animation.render();
-        stage.update();
-    }, 17);
+    }
+    //setInterval(function() {
+        //animation.render();
+        //stage.update();
+    //}, 17);
     //renderer = PIXI.autoDetectRenderer(WIDTH, HEIGHT);
     //requestAnimFrame(animate);
     //function animate() {
