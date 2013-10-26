@@ -2,6 +2,7 @@
 /*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH */
 
 var helper = {
+    _stones_map_img: false,
     killSelf: function(ob) {
         animation.removeFromRender(ob);
         ob.sprite.alpha = 0;
@@ -20,6 +21,23 @@ var helper = {
         ctx.fillStyle = "black"; 
         return {ctx: ctx, canvas: canvas};
     },
+    getStonesMapImg: function(callback) {
+        if (this._stones_map_img) { return this._stones_map_img; }
+        var canv = helper.getSpecialCanvas();
+        canv.ctx.fillStyle = 'red';
+        canv.ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        canv.ctx.fillStyle = 'black';
+        _.each(stoneManager.stones, function(stone) {
+            _.each(stoneManager.getVertices(stone), function(dot, i) {
+                i ? canv.ctx.lineTo(dot.x, dot.y) : canv.ctx.moveTo(dot.x, dot.y);
+            });
+        });
+        canv.ctx.fill();
+        var img = new Image();
+        img.src = canv.canvas.toDataURL();
+        this._stones_map_img = img;
+        return this._stones_map_img;
+    }
 };
 
 var Bullet = function(angle, x, y, distance) {
@@ -155,7 +173,6 @@ Bullet.prototype = {
                 it.killSelf();
                 return;
             }
-
             if (it.boomOnStone()) { return; }
 
             var mask_dots = it.getMaskDots(stoneManager.stones);
@@ -271,15 +288,17 @@ var Soldier = function(x, y, angle) {
     document.addEventListener('PointerMove', function(e) {
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
         var x = e.clientX, y = e.clientY;
-        it.trace.graphics.lineTo(x, y);
-
         it.dots.push({x: x, y: y});
+        it.trace.graphics.lineTo(x, y);
+        it.checkStoneIntersect(it.dots, stoneManager.stones);
     }, false);
     document.addEventListener('PointerUp', function(e) {
         if (it.pointerId === e.pointerId) {
             it.pointerId = false;
             it.start_time = new Date().getTime();
             it.setDotLengths(it.dots);
+
+            //it.trace.graphics.clear();
             animation.pushToRender(it);
         }
     });
@@ -299,6 +318,56 @@ var Soldier = function(x, y, angle) {
 };
 
 Soldier.prototype = {
+    checkStoneIntersect: function(dots, stones) {
+        var canv = helper.getSpecialCanvas();
+        canv.ctx.fillStyle = 'red';
+        canv.ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        canv.ctx.fillStyle = 'black';
+        _.each(stoneManager.stones, function(stone) {
+            _.each(stoneManager.getVertices(stone), function(dot, i) {
+                i ? canv.ctx.lineTo(dot.x, dot.y) : canv.ctx.moveTo(dot.x, dot.y);
+            });
+        });
+        canv.ctx.fill();
+        im_before = canv.canvas.toDataURL();
+
+
+        canv2 = helper.getSpecialCanvas();
+        img = new Image();
+        img.src = im_before;
+        img.onload = function() {
+            canv2.ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
+
+            canv2.ctx.strokeStyle = 'red';
+            _.each(dots, function(dot, i) {
+                i ? canv2.ctx.lineTo(dot.x, dot.y) : canv2.ctx.moveTo(dot.x, dot.y);
+            });
+            canv2.ctx.stroke();
+            im_after = canv2.canvas.toDataURL();
+            console.log(im_before == im_after);
+        }
+
+
+        
+        //canv.ctx.strokeStyle = 'red';
+        //canv.ctx.moveTo(10, 10);
+        //canv.ctx.lineTo(100, 100);
+
+
+        ////_.each(dots, function(dot, i) {
+            ////i ? canv.ctx.lineTo(dot.x, dot.y) : canv.ctx.moveTo(dot.x, dot.y);
+        ////});
+        ////canv.ctx.stroke();
+        //im_after = canv.canvas.toDataURL("image/bmp");
+
+        //console.log(im_after === im_before);
+        ////console.log(im_after); 
+        ////console.log(im_before);
+        canvas = canv.canvas;
+        ctx = canv.ctx;
+
+        //$('body').append(canv.canvas);
+    },
     killSelf: function() {
         this.is_dead = true;
         soldierManager.killSoldier(this);
@@ -383,11 +452,13 @@ var stoneManager = {
 
     },
     getVertices: function(sprite) {
+        if (sprite.versites) { return sprite.versites; }
         var x = sprite.x;
         var y = sprite.y;
         var half_w = sprite.width_by_scale/2 - 10;
         var half_h = sprite.height_by_scale/2 - 10;
-        return [{x: x - half_w, y: y - half_h}, {x: x + half_w, y: y - half_h}, {x: x + half_w, y: y + half_h}, {x: x - half_w, y: y + half_h}];
+        sprite.versites = [{x: x - half_w, y: y - half_h}, {x: x + half_w, y: y - half_h}, {x: x + half_w, y: y + half_h}, {x: x - half_w, y: y + half_h}];
+        return sprite.versites;
     },
     getMaxMinAngleDot: function(sprite, x, y) {
         var dots = stoneManager.getVertices(sprite);

@@ -1,4 +1,4 @@
-/*global _, utils, requestAnimFrame, getImg, createjs */
+/*global _, utils, requestAnimFrame, getImg, createjs, requestAnimationFrame */
 Number.prototype.toRad = function () { return this * Math.PI / 180; }; // градусы в радианы например: (90).toRad();
 Number.prototype.toGrad = function() { return this * 180 / Math.PI; }; // радианы в градусы
 var WIDTH, HEIGHT, stage;
@@ -69,8 +69,8 @@ $(document).ready(function() {
     requestAnimationFrame(animate);
     function animate() {
         requestAnimationFrame(animate);
-        animation.render(); 
-        stage.update(); 
+        animation.render();
+        stage.update();
 
     }
     //setInterval(function() {
