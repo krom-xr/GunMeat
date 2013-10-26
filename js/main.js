@@ -37,10 +37,10 @@ var Bullet = function(angle, x, y, distance) {
     sprite.image.after_load(function() {
         sprite.regX  = sprite.image.width * 0.5;
         sprite.regY = sprite.image.height * 0.5;
-        sprite.x = x;
-        sprite.y = y;
         sprite.rotation = angle;
     });
+    sprite.x = x;
+    sprite.y = y;
     this.sprite = sprite;
     this.distance = distance;
     this.angle = angle,
@@ -113,12 +113,9 @@ Bullet.prototype = {
     },
     hitSoldiers: function() {
         var it = this;
-        var hit_soldiers = [];
-        _.each(soldierManager.getSoldiers(), function(soldier) {
-            var hit = utils.dotInRadius({x: it.sprite.x, y: it.sprite.y}, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS);
-            hit && hit_soldiers.push(soldier);
-        });
-        return hit_soldiers;
+        return _.filter(soldierManager.getSoldiers(), function(soldier) {
+            return utils.dotInRadius({x: it.sprite.x, y: it.sprite.y}, soldier.getCurrentCoord(), BULLET_DESTROY_RADIUS); });
+
     },
     killSoldiers: function(soldiers, mask_dots) {
         var canvas, ctx;
@@ -162,8 +159,12 @@ Bullet.prototype = {
     },
     killSelf: function() { helper.killSelf(this); },
     isDistancePassed: function() {
+
         var xlen = Math.abs(this.sprite.x - this.x0);
         var ylen = Math.abs(this.sprite.y - this.y0);
+        console.log(this.sprite.x, this.x0);
+        //console.log(xlen, ylen);
+        //console.log('dist', this.distance);
         return (xlen * xlen + ylen * ylen) >= this.distance * this.distance;
     },
     setBulletMask: function(bullet, stone) {

@@ -71,13 +71,17 @@ $(document).ready(function() {
         //stage.update(event); 
     //});
 
-    requestAnimationFrame(animate);
-    function animate() {
-        requestAnimationFrame(animate);
+    //requestAnimationFrame(animate);
+    //function animate() {
+        //requestAnimationFrame(animate);
+        //animation.render(); 
+        //stage.update(); 
+
+    //}
+    setInterval(function() {
         animation.render(); 
         stage.update(); 
-
-    }
+    }, 17);
     //renderer = PIXI.autoDetectRenderer(WIDTH, HEIGHT);
     //requestAnimFrame(animate);
     //function animate() {
