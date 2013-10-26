@@ -1,7 +1,7 @@
-/*global _, utils, PIXI, requestAnimFrame  */
+/*global _, utils, requestAnimFrame, getImg, createjs */
 Number.prototype.toRad = function () { return this * Math.PI / 180; }; // градусы в радианы например: (90).toRad();
 Number.prototype.toGrad = function() { return this * 180 / Math.PI; }; // радианы в градусы
-var WIDTH, HEIGHT;
+var WIDTH, HEIGHT, stage;
 
 //var interactive = true;
 //var stage = new PIXI.Stage(0xEEEEEE, interactive);
@@ -79,8 +79,8 @@ $(document).ready(function() {
 
     //}
     setInterval(function() {
-        animation.render(); 
-        stage.update(); 
+        animation.render();
+        stage.update();
     }, 17);
     //renderer = PIXI.autoDetectRenderer(WIDTH, HEIGHT);
     //requestAnimFrame(animate);

@@ -248,17 +248,34 @@ var Soldier = function(x, y, angle) {
 
     var draw = false;
 
+
+
+    //trace = new createjs.Shape();
+    //trace.graphics.beginStroke('rgba(10,10,10,1)');
+    //stage.addChild(trace);
+
     document.addEventListener('PointerDown', function(e) {
         e.stopPropagation(); e.preventDefault();
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: it.sprite.x, y: it.sprite.y});
         if (is_near < 50) {
+            console.log('test');
+            console.log(e.pointerId);
+
+            //trace.graphics.moveTo(e.clientX, e.clientY);
+
             it.pointerId = e.pointerId;
             it.dots = [];
         }
     });
     document.addEventListener('PointerMove', function(e) {
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
-        it.dots.push({x: e.clientX, y: e.clientY});
+        var x = e.clientX, y = e.clientY;
+
+            console.log('move');
+        
+        //trace.graphics.lineTo(x, y);
+
+        it.dots.push({x: x, y: y});
     }, false);
     document.addEventListener('PointerUp', function(e) {
         if (it.pointerId === e.pointerId) {
@@ -366,34 +383,6 @@ var stoneManager = {
         this.stones.push(stone3);
         this.stones.push(stone4);
 
-        //var trace = new createjs.Shape();
-        //trace.graphics.beginStroke("#000")
-            //.moveTo(10, 10).lineTo(100, 10).lineTo(100, 100).lineTo(10,100).lineTo(10,10)
-            //.moveTo(10, 110).lineTo(100, 110).lineTo(100, 210).lineTo(10, 210).lineTo(10, 110)
-            //.moveTo(0,0).lineTo(0, 800).lineTo(800, 800).lineTo(800, 0).lineTo(0, 0);
-
-        //trace.x = 300;
-        //trace.y = 200;
-
-        //stone1.mask = trace;
-
-        //stage.addChild(trace);
-        
-        //console.log('top');
-        //this.getMaxMinAngle(stone1, 300, 200);
-
-        //console.log('right');
-        //this.getMaxMinAngle(stone1, 400, 300);
-
-        //console.log('bottom');
-        //this.getMaxMinAngle(stone1, 300, 500);
-
-        //console.log('left');
-        //this.getMaxMinAngle(stone1, 200, 300);
-
-        //console.log('other');
-        //this.getMaxMinAngle(stone1, 500, 500);
-
     },
     getVertices: function(sprite) {
         var x = sprite.x;
@@ -402,7 +391,6 @@ var stoneManager = {
         var half_h = sprite.height_by_scale/2 - 10;
         return [{x: x - half_w, y: y - half_h}, {x: x + half_w, y: y - half_h}, {x: x + half_w, y: y + half_h}, {x: x - half_w, y: y + half_h}];
     },
-
     getMaxMinAngleDot: function(sprite, x, y) {
         var dots = stoneManager.getVertices(sprite);
         var max_angle = -100000, min_angle = 10000, max_dot, min_dot;
