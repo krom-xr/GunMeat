@@ -36,12 +36,14 @@ var helper = {
             });
         });
         canv.ctx.fill();
-        var img = new Image();
-        img.onload = function() {
-            it._stones_map_img = img;
-            callback(it._stones_map_img);
-        }
-        img.src = canv.canvas.toDataURL();
+        it._stones_map_img = canv.ctx;
+        callback(it._stones_map_img);
+        //var img = new Image();
+        //img.onload = function() {
+            //it._stones_map_img = img;
+            //callback(it._stones_map_img);
+        //}
+        //img.src = canv.canvas.toDataURL();
     }
 };
 
@@ -277,6 +279,7 @@ var Soldier = function(x, y, angle) {
     var draw = false;
 
     var checkStoneIntersect = _.throttle(it.checkStoneIntersect, 50);
+    //var checkStoneIntersect = it.checkStoneIntersect;
     document.addEventListener('PointerDown', function(e) {
         e.stopPropagation(); e.preventDefault();
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: it.sprite.x, y: it.sprite.y});
@@ -326,6 +329,22 @@ var Soldier = function(x, y, angle) {
     this.sprite.height = 100;
     this.animation_loop = _.throttle(animation.loop, 10/SOLDIER_SPEED);
 };
+//function checkArrayEqual(a,b) { return JSON.stringify(a) === JSON.stringify(b); }
+//function checkArrayEqual(a,b) { return !(a<b || b<a); }
+function checkArrayEqual(a,b) { return !!a && !!b && !(a<b || b<a); }
+//function checkArrayEqual(a,b) { return _.isEqual(a,b); }
+function checkArrayEqual(arr1, arr2) {
+    test = arr1;
+    var check = true;
+    if (arr1.length !== arr2.length) { return false; }
+    for (var i = 0; i < arr1.length; i++) {
+        check = arr1[i] === arr2[i];
+        //check = arr1.pop() === arr2.pop();
+
+        if (!check) { return false; }
+    };
+    return true;
+}
 
 Soldier.prototype = {
     checkStoneIntersect: function(dots, stones) {
@@ -333,9 +352,26 @@ Soldier.prototype = {
         helper.getStonesMapImg(function(img) {
             if (!it.line_canv) {
                 it.line_canv = helper.getSpecialCanvas();
-                it.line_canv.ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
+                //it.line_canv.ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
+                it.line_canv.ctx.putImageData(img.getImageData(0,0,WIDTH, HEIGHT), 0, 0, 0, 0, WIDTH, HEIGHT);
                 it.line_canv.ctx.strokeStyle = 'red';
+                
+                var im_data = it.line_canv.ctx.getImageData(0,0,WIDTH, HEIGHT).data;
+
+                //console.log(im_data, img.data);
+
             }
+            var max_x = 0, max_y = 0, min_x = 100000, min_y = 100000;
+            _.each(dots, function(dot) {
+                if (dot.stone_intersect_checked) { return; }
+                if (max_x < dot.x) { max_x = dot.x }
+                if (max_y < dot.y) { max_y = dot.y }
+                if (min_x > dot.x) { min_x = dot.x }
+                if (min_y > dot.y) { min_y = dot.y }
+            });
+            //console.log(max_x, max_y, min_x, min_y);
+
+
 
             _.each(dots, function(dot, i) {
                 if (dot.stone_intersect_checked) { return; }
@@ -343,18 +379,12 @@ Soldier.prototype = {
                 dot.stone_intersect_checked = true;
             });
             it.line_canv.ctx.stroke();
+
+            var im_data = it.line_canv.ctx.getImageData(min_x,min_y,max_x, max_y).data;
+            var img_data = img.getImageData(min_x,min_y,max_x, max_y).data;
             console.time('one');
-            im_after = it.line_canv.canvas.toDataURL();
+            console.log(checkArrayEqual(im_data, img_data ));
             console.timeEnd('one');
-
-            console.time('two');
-            im_after = it.line_canv.ctx.getImageData(0,0, WIDTH, HEIGHT);
-            console.timeEnd('two');
-
-
-            console.log(img.src == im_after);
-            //
-            test = it.line_canv;
         });
 
 
