@@ -36,8 +36,7 @@ var helper = {
             });
         });
         canv.ctx.fill();
-        //it._stones_map_ctx = canv.ctx;
-        it._stones_map_ctx = canv;
+        it._stones_map_ctx = canv.ctx;
         callback(it._stones_map_ctx);
     }
 };
@@ -316,8 +315,8 @@ var Soldier = function(x, y, angle) {
             animation.pushToRender(it);
             it.trace.alpha = 0.5;
 
-            setTimeout(function() {
-                it.trace.graphics.clear();
+            setTimeout(function() { 
+                it.trace.graphics.clear(); 
             }, 2000);
         }
     });
@@ -352,10 +351,10 @@ var checkArrEq = _.throttle(checkArrayEqual, 50);
 Soldier.prototype = {
     checkStoneIntersect: function(dots, stones, callback) {
         var it = this;
-        helper.getStonesMapCtx(function(canv) {
+        helper.getStonesMapCtx(function(ctx) {
             if (!it.line_canv) {
                 it.line_canv = helper.getSpecialCanvas();
-                it.line_canv.ctx.putImageData(canv.ctx.getImageData(0,0,WIDTH, HEIGHT), 0, 0, 0, 0, WIDTH, HEIGHT);
+                it.line_canv.ctx.putImageData(ctx.getImageData(0,0,WIDTH, HEIGHT), 0, 0, 0, 0, WIDTH, HEIGHT);
                 it.line_canv.ctx.strokeStyle = 'red';
             }
             var max_x = 0, max_y = 0, min_x = 100000, min_y = 100000;
@@ -374,15 +373,9 @@ Soldier.prototype = {
             });
             it.line_canv.ctx.stroke();
 
-            //var im_data = it.line_canv.ctx.getImageData(min_x,min_y,max_x, max_y);
-            //var ctx_data = ctx.getImageData(min_x,min_y,max_x, max_y);
-            //if (!checkArrEq(im_data.data, ctx_data.data)) {
-                //it.line_canv = false;
-                //callback(true);
-            //}
-            var im_data = it.line_canv.canvas.toDataURL();
-            var canv_data = canv.canvas.toDataURL();
-            if (im_data !== canv_data) {
+            var im_data = it.line_canv.ctx.getImageData(min_x,min_y,max_x, max_y);
+            var ctx_data = ctx.getImageData(min_x,min_y,max_x, max_y);
+            if (!checkArrEq(im_data.data, ctx_data.data)) {
                 it.line_canv = false;
                 callback(true);
             }
