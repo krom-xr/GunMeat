@@ -1,4 +1,4 @@
-/*global _*/
+/*global _, global*/
 if (typeof global !== 'undefined') {
     window._ = global._;
 }
@@ -83,10 +83,10 @@ utils.clear_undefined = function(params_dict) {
 };
 
 /* удаляет элемент из массива */
-utils.removeElFromArray = function (el, arr) { 
+utils.removeElFromArray = function (el, arr) {
     var index = $.inArray(el, arr);
     if (index !== -1) { arr.splice(index, 1); }
-    return arr; 
+    return arr;
 };
 
 /* пытается преобразовать данные в json,
@@ -206,7 +206,7 @@ utils.dotInRect = function(rect, dot) {
 utils.getCoordByKxb2 = function(dot1, dot2, length) {
     var length_between_dots = utils.getLength(dot1, dot2);
     if (length_between_dots < length) {
-        dot2.x = dot2.x * 10; 
+        dot2.x = dot2.x * 10;
         dot2.y = dot2.y * 10;
         utils.getCoordByKxb2(dot1, dot2, length);
     }
@@ -258,4 +258,31 @@ utils.setWHForEasel = function(easel_bmp, w, h) {
     easel_bmp.height_by_scale = h;
     easel_bmp.scaleX = scale_w;
     easel_bmp.scaleY = scale_h;
+};
+
+utils.segmentIntersetion = function(start1, end1, start2, end2) {
+    var dir1 = { x: end1.x - start1.x, y: end1.y - start1.y };
+    var dir2 = { x: end2.x - start2.x, y: end2.y - start2.y };
+
+    var a1 = -dir1.y;
+    var b1 = +dir1.x;
+    var d1 = -(a1 * start1.x + b1*start1.y);
+
+    var a2 = -dir2.y;
+    var b2 = +dir2.x;
+    var d2 = -(a2 * start2.x + b2*start2.y);
+
+    var seg1_line2_start = a2*start1.x + b2*start1.y + d2;
+    var seg1_line2_end = a2*end1.x + b2*end1.y + d2;
+
+    var seg2_line1_start = a1*start2.x + b1*start2.y + d1;
+    var seg2_line1_end = a1*end2.x + b1*end2.y + d1;
+
+    //если концы одного отрезка имеют один знак, значит он в одной полуплоскости и пересечения нет.
+    if (seg1_line2_start * seg1_line2_end >= 0 || seg2_line1_start * seg2_line1_end >= 0) {
+        return false;
+    }
+
+    var u = seg1_line2_start / (seg1_line2_start - seg1_line2_end);
+    return true;
 };
