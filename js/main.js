@@ -2,7 +2,7 @@
 /*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH */
 
 var helper = {
-    _stones_map_img: false,
+    _stones_map_ctx: false,
     killSelf: function(ob) {
         animation.removeFromRender(ob);
         ob.sprite.alpha = 0;
@@ -18,13 +18,13 @@ var helper = {
     getSpecialCanvas: function() {
         var canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
         canvas.width = WIDTH; canvas.height = HEIGHT;
-        ctx.fillStyle = "black"; 
+        ctx.fillStyle = "black";
         return {ctx: ctx, canvas: canvas};
     },
-    getStonesMapImg: function(callback) {
-        if (this._stones_map_img == 'wait') { return; }
-        if (this._stones_map_img) { callback(this._stones_map_img); return; }
-        this._stones_map_img = 'wait';
+    getStonesMapCtx: function(callback) {
+        if (this._stones_map_ctx === 'wait') { return; }
+        if (this._stones_map_ctx) { callback(this._stones_map_ctx); return; }
+        this._stones_map_ctx = 'wait';
         var it = this;
         var canv = helper.getSpecialCanvas();
         canv.ctx.fillStyle = 'red';
@@ -36,14 +36,8 @@ var helper = {
             });
         });
         canv.ctx.fill();
-        it._stones_map_img = canv.ctx;
-        callback(it._stones_map_img);
-        //var img = new Image();
-        //img.onload = function() {
-            //it._stones_map_img = img;
-            //callback(it._stones_map_img);
-        //}
-        //img.src = canv.canvas.toDataURL();
+        it._stones_map_ctx = canv.ctx;
+        callback(it._stones_map_ctx);
     }
 };
 
@@ -233,7 +227,7 @@ var BigGun = function(x, y, angle) {
         sprite.rotation = angle;
     });
 
-    //TODO тут надо сделать так чтобы нельзя было выбрать двух солдатиков одновременно
+    //Пушка
     document.addEventListener('PointerDown', function(e) {
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
         if (is_near < 50) { it.pointerId = e.pointerId; }
@@ -283,16 +277,17 @@ var Soldier = function(x, y, angle) {
     document.addEventListener('PointerDown', function(e) {
         e.stopPropagation(); e.preventDefault();
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: it.sprite.x, y: it.sprite.y});
-        if (is_near < 50) {
+        if (is_near > 50) { return false; }
+        var sold = _.find(soldierManager.soldiers, function(soldier) { return soldier.pointerId === e.pointerId; });
+        if (sold) { return false; }
 
-            var trace = new createjs.Shape();
-            trace.graphics.beginStroke('rgba(10,10,10,1)');
-            trace.graphics.moveTo(e.clientX, e.clientY);
-            stage.addChild(trace);
-            it.trace = trace;
-            it.pointerId = e.pointerId;
-            it.dots = [];
-        }
+        var trace = new createjs.Shape();
+        trace.graphics.beginStroke('rgba(10,10,10,1)');
+        trace.graphics.moveTo(e.clientX, e.clientY);
+        stage.addChild(trace);
+        it.trace = trace;
+        it.pointerId = e.pointerId;
+        it.dots = [];
     });
     document.addEventListener('PointerMove', function(e) {
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
@@ -303,7 +298,13 @@ var Soldier = function(x, y, angle) {
         it.dots.push(dot);
         it.trace.graphics.lineTo(x, y);
 
-        checkStoneIntersect(it.dots, stoneManager.stones);
+        checkStoneIntersect(it.dots, stoneManager.stones, function(intersect) {
+            console.log(intersect);
+            if (!intersect) { return; }
+            it.pointerId = false;
+            it.trace.graphics.clear();
+
+        });
     }, false);
     document.addEventListener('PointerUp', function(e) {
         if (it.pointerId === e.pointerId) {
@@ -311,8 +312,12 @@ var Soldier = function(x, y, angle) {
             it.start_time = new Date().getTime();
             it.setDotLengths(it.dots);
 
-            //it.trace.graphics.clear();
             animation.pushToRender(it);
+            it.trace.alpha = 0.5;
+
+            setTimeout(function() { 
+                it.trace.graphics.clear(); 
+            }, 2000);
         }
     });
 
@@ -329,12 +334,8 @@ var Soldier = function(x, y, angle) {
     this.sprite.height = 100;
     this.animation_loop = _.throttle(animation.loop, 10/SOLDIER_SPEED);
 };
-//function checkArrayEqual(a,b) { return JSON.stringify(a) === JSON.stringify(b); }
-//function checkArrayEqual(a,b) { return !(a<b || b<a); }
-//function checkArrayEqual(a,b) { return !!a && !!b && !(a<b || b<a); }
-//function checkArrayEqual(a,b) { return _.isEqual(a,b); }
+
 function checkArrayEqual(arr1, arr2) {
-    test = arr1;
     var check = true;
     if (arr1.length !== arr2.length) { return false; }
     for (var i = 0; i < arr1.length; i++) {
@@ -342,37 +343,28 @@ function checkArrayEqual(arr1, arr2) {
         //check = arr1.pop() === arr2.pop();
 
         if (!check) { return false; }
-    };
+    }
     return true;
 }
 var checkArrEq = _.throttle(checkArrayEqual, 50);
 
 Soldier.prototype = {
-    checkStoneIntersect: function(dots, stones) {
+    checkStoneIntersect: function(dots, stones, callback) {
         var it = this;
-        helper.getStonesMapImg(function(img) {
+        helper.getStonesMapCtx(function(ctx) {
             if (!it.line_canv) {
                 it.line_canv = helper.getSpecialCanvas();
-                //it.line_canv.ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
-                it.line_canv.ctx.putImageData(img.getImageData(0,0,WIDTH, HEIGHT), 0, 0, 0, 0, WIDTH, HEIGHT);
+                it.line_canv.ctx.putImageData(ctx.getImageData(0,0,WIDTH, HEIGHT), 0, 0, 0, 0, WIDTH, HEIGHT);
                 it.line_canv.ctx.strokeStyle = 'red';
-                
-                var im_data = it.line_canv.ctx.getImageData(0,0,WIDTH, HEIGHT).data;
-
-                //console.log(im_data, img.data);
-
             }
             var max_x = 0, max_y = 0, min_x = 100000, min_y = 100000;
             _.each(dots, function(dot) {
                 if (dot.stone_intersect_checked) { return; }
-                if (max_x < dot.x) { max_x = dot.x }
-                if (max_y < dot.y) { max_y = dot.y }
-                if (min_x > dot.x) { min_x = dot.x }
-                if (min_y > dot.y) { min_y = dot.y }
+                if (max_x < dot.x) { max_x = dot.x; }
+                if (max_y < dot.y) { max_y = dot.y; }
+                if (min_x > dot.x) { min_x = dot.x; }
+                if (min_y > dot.y) { min_y = dot.y; }
             });
-            //console.log(max_x, max_y, min_x, min_y);
-
-
 
             _.each(dots, function(dot, i) {
                 if (dot.stone_intersect_checked) { return; }
@@ -382,53 +374,12 @@ Soldier.prototype = {
             it.line_canv.ctx.stroke();
 
             var im_data = it.line_canv.ctx.getImageData(min_x,min_y,max_x, max_y);
-            var img_data = img.getImageData(min_x,min_y,max_x, max_y);
-            //console.log(im_data.BYTES_PER_ELEMENT);
-            //console.log(img_data.length);
-            //console.log(im_data.data.BYTES_PER_ELEMENT);
-            //worker.postMessage({ test: it.line_canv.ctx.getImageData(min_x,min_y,max_x, max_y)});
-            //console.time('one');
-            //console.log(checkArrayEqual(im_data.data, img_data.data ));
-            console.log(checkArrEq(im_data.data, img_data.data ));
-            //console.timeEnd('one');
+            var ctx_data = ctx.getImageData(min_x,min_y,max_x, max_y);
+            if (!checkArrEq(im_data.data, ctx_data.data)) {
+                it.line_canv = false;
+                callback(true);
+            }
         });
-
-
-        //canv2 = helper.getSpecialCanvas();
-        //img = new Image();
-        //img.src = im_before;
-        //img.onload = function() {
-            //canv2.ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
-
-            //canv2.ctx.strokeStyle = 'red';
-            //_.each(dots, function(dot, i) {
-                //i ? canv2.ctx.lineTo(dot.x, dot.y) : canv2.ctx.moveTo(dot.x, dot.y);
-            //});
-            //canv2.ctx.stroke();
-            //im_after = canv2.canvas.toDataURL();
-            //console.log(im_before == im_after);
-        //}
-
-
-        
-        //canv.ctx.strokeStyle = 'red';
-        //canv.ctx.moveTo(10, 10);
-        //canv.ctx.lineTo(100, 100);
-
-
-        ////_.each(dots, function(dot, i) {
-            ////i ? canv.ctx.lineTo(dot.x, dot.y) : canv.ctx.moveTo(dot.x, dot.y);
-        ////});
-        ////canv.ctx.stroke();
-        //im_after = canv.canvas.toDataURL("image/bmp");
-
-        //console.log(im_after === im_before);
-        ////console.log(im_after); 
-        ////console.log(im_before);
-        //canvas = canv.canvas;
-        //ctx = canv.ctx;
-
-        //$('body').append(canv.canvas);
     },
     killSelf: function() {
         this.is_dead = true;
