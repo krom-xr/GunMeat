@@ -278,7 +278,7 @@ var Soldier = function(x, y, angle) {
 
     var draw = false;
 
-    var checkStoneIntersect = _.throttle(it.checkStoneIntersect, 50);
+    var checkStoneIntersect = _.throttle(it.checkStoneIntersect, 100);
     //var checkStoneIntersect = it.checkStoneIntersect;
     document.addEventListener('PointerDown', function(e) {
         e.stopPropagation(); e.preventDefault();
