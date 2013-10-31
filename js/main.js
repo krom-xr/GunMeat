@@ -293,18 +293,17 @@ var Soldier = function(x, y, angle) {
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
         var x = e.clientX, y = e.clientY;
         var dot = {x: x, y: y};
-        var prev_dot = it.dots[it.dots.length - 1];
-        var last_dots = [prev_dot, dot];
         it.dots.push(dot);
         it.trace.graphics.lineTo(x, y);
 
+        //console.time('one');
         checkStoneIntersect(it.dots, stoneManager.stones, function(intersect) {
-            console.log(intersect);
             if (!intersect) { return; }
             it.pointerId = false;
             it.trace.graphics.clear();
 
         });
+        //console.timeEnd('one');
     }, false);
     document.addEventListener('PointerUp', function(e) {
         if (it.pointerId === e.pointerId) {
@@ -315,8 +314,8 @@ var Soldier = function(x, y, angle) {
             animation.pushToRender(it);
             it.trace.alpha = 0.5;
 
-            setTimeout(function() { 
-                it.trace.graphics.clear(); 
+            setTimeout(function() {
+                it.trace.graphics.clear();
             }, 2000);
         }
     });
@@ -348,38 +347,38 @@ function checkArrayEqual(arr1, arr2) {
 }
 var checkArrEq = _.throttle(checkArrayEqual, 50);
 
+//var dotInRect = function(dot, rect) {
+    //if  dot.x
+//}
+
 Soldier.prototype = {
     checkStoneIntersect: function(dots, stones, callback) {
         var it = this;
-        helper.getStonesMapCtx(function(ctx) {
-            if (!it.line_canv) {
-                it.line_canv = helper.getSpecialCanvas();
-                it.line_canv.ctx.putImageData(ctx.getImageData(0,0,WIDTH, HEIGHT), 0, 0, 0, 0, WIDTH, HEIGHT);
-                it.line_canv.ctx.strokeStyle = 'red';
-            }
-            var max_x = 0, max_y = 0, min_x = 100000, min_y = 100000;
-            _.each(dots, function(dot) {
-                if (dot.stone_intersect_checked) { return; }
-                if (max_x < dot.x) { max_x = dot.x; }
-                if (max_y < dot.y) { max_y = dot.y; }
-                if (min_x > dot.x) { min_x = dot.x; }
-                if (min_y > dot.y) { min_y = dot.y; }
+        _.each(dots, function(dot, i) {
+            if (!i) { return; }
+            if (dot.intersect_checked) {  return; }
+            var prev_dot = dots[i - 1];
+            if (dot.x === prev_dot.x && dot.y === prev_dot.y) { return; }
+
+            //var intersect = utils.dotShape(stoneManager.getVertices(stone), dot);
+            
+            _.each(stoneManager.stones, function(stone) {
+                _.each(stoneManager.getSegments(stone), function(segment) {
+                    var intersect = utils.segmentIntersetion(segment[0], segment[1], dot, prev_dot);
+                    intersect && callback(true);
+                });
+                var intersect = stoneManager.checkDotInStone(dot, stone);
+                intersect && callback(true);
+
             });
 
-            _.each(dots, function(dot, i) {
-                if (dot.stone_intersect_checked) { return; }
-                i ? it.line_canv.ctx.lineTo(dot.x, dot.y) : it.line_canv.ctx.moveTo(dot.x, dot.y);
-                dot.stone_intersect_checked = true;
-            });
-            it.line_canv.ctx.stroke();
-
-            var im_data = it.line_canv.ctx.getImageData(min_x,min_y,max_x, max_y);
-            var ctx_data = ctx.getImageData(min_x,min_y,max_x, max_y);
-            if (!checkArrEq(im_data.data, ctx_data.data)) {
-                it.line_canv = false;
-                callback(true);
-            }
+            //_.each(stoneManager.getAllSegments(), function(segment) {
+                //var intersect = utils.segmentIntersetion(segment[0], segment[1], dot, prev_dot);
+                //intersect && callback(true);
+            //});
+            prev_dot.intersect_checked = true;
         });
+        
     },
     killSelf: function() {
         this.is_dead = true;
@@ -464,6 +463,14 @@ var stoneManager = {
         this.stones.push(stone4);
 
     },
+    checkDotInStone: function(dot, stone) {
+        var w = stone.width_by_scale - 10, h = stone.height_by_scale - 10;
+        var x = stone.x - w/2, y = stone.y - h/2;
+        if ( (x < dot.x && dot.x < x + w) &&
+             (y < dot.y && dot.y < y + h) ) { return true; }
+        return false;
+
+    },
     getVertices: function(sprite) {
         if (sprite.versites) { return sprite.versites; }
         var x = sprite.x;
@@ -492,6 +499,30 @@ var stoneManager = {
             }
         });
         return {max: max_dot, min: min_dot};
+    },
+    getAllSegments: function() {
+        var it = this;
+        if (!it.all_segments) {
+            it.all_segments = [];
+            _.each(stoneManager.stones, function(stone) {
+                _.each(stoneManager.getSegments(stone), function(segment) {
+                    it.all_segments.push(segment);
+                });
+            });
+        }
+        return it.all_segments;
+    },
+    getSegments: function(stone) {
+        if (!stone.segments) {
+            var vertices = stoneManager.getVertices(stone);
+            stone.segments = [
+                [vertices[0], vertices[1]],
+                [vertices[1], vertices[2]],
+                [vertices[2], vertices[3]],
+                [vertices[3], vertices[0]],
+            ];
+        }
+        return stone.segments;
     },
     newStone: function(img, x, y) {
         var sprite = new createjs.Bitmap(img);

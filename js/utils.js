@@ -261,6 +261,7 @@ utils.setWHForEasel = function(easel_bmp, w, h) {
 };
 
 utils.segmentIntersetion = function(start1, end1, start2, end2) {
+    //console.log(start1, end1, start2, end2);
     var dir1 = { x: end1.x - start1.x, y: end1.y - start1.y };
     var dir2 = { x: end2.x - start2.x, y: end2.y - start2.y };
 
