@@ -331,7 +331,7 @@ var Soldier = function(x, y, angle) {
 };
 //function checkArrayEqual(a,b) { return JSON.stringify(a) === JSON.stringify(b); }
 //function checkArrayEqual(a,b) { return !(a<b || b<a); }
-function checkArrayEqual(a,b) { return !!a && !!b && !(a<b || b<a); }
+//function checkArrayEqual(a,b) { return !!a && !!b && !(a<b || b<a); }
 //function checkArrayEqual(a,b) { return _.isEqual(a,b); }
 function checkArrayEqual(arr1, arr2) {
     test = arr1;
@@ -345,6 +345,7 @@ function checkArrayEqual(arr1, arr2) {
     };
     return true;
 }
+var checkArrEq = _.throttle(checkArrayEqual, 50);
 
 Soldier.prototype = {
     checkStoneIntersect: function(dots, stones) {
@@ -380,11 +381,16 @@ Soldier.prototype = {
             });
             it.line_canv.ctx.stroke();
 
-            var im_data = it.line_canv.ctx.getImageData(min_x,min_y,max_x, max_y).data;
-            var img_data = img.getImageData(min_x,min_y,max_x, max_y).data;
-            console.time('one');
-            console.log(checkArrayEqual(im_data, img_data ));
-            console.timeEnd('one');
+            var im_data = it.line_canv.ctx.getImageData(min_x,min_y,max_x, max_y);
+            var img_data = img.getImageData(min_x,min_y,max_x, max_y);
+            //console.log(im_data.BYTES_PER_ELEMENT);
+            //console.log(img_data.length);
+            //console.log(im_data.data.BYTES_PER_ELEMENT);
+            //worker.postMessage({ test: it.line_canv.ctx.getImageData(min_x,min_y,max_x, max_y)});
+            //console.time('one');
+            //console.log(checkArrayEqual(im_data.data, img_data.data ));
+            console.log(checkArrEq(im_data.data, img_data.data ));
+            //console.timeEnd('one');
         });
 
 

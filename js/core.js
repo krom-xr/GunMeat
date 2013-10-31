@@ -4,15 +4,13 @@ Number.prototype.toGrad = function() { return this * 180 / Math.PI; }; // рад
 var WIDTH, HEIGHT, stage;
 var RENDER_ITEMS = [];
 
-var worker = new window.Worker('js/webworker.js'); 
-worker.onmessage = function() {
-    console.log('messages');
-}
-worker.onerror = function() {
-    console.log('ошибочка вышла');
-}
-
-worker.postMessage('test');
+//var worker = new window.Worker('js/webworker.js'); 
+//worker.onmessage = function() {
+    //console.log('messages');
+//}
+//worker.onerror = function() {
+    //console.log('ошибочка вышла');
+//}
 
 var animation = {
     loadTextureSequence: function(base_sprite_path, number_of_images, start_from, ext) {
