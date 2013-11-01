@@ -218,12 +218,16 @@ var BigGun = function(x, y, angle) {
     //Пушка
     document.addEventListener('PointerDown', function(e) {
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
-        if (is_near < 50) { it.pointerId = e.pointerId; }
+        if (is_near < 100) { 
+            it.pointerId = e.pointerId;
+            sprite.image = textures_static.big_gun_active(); 
+        }
+
     });
     document.addEventListener('PointerMove', function(e) {
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
 
-        var angle_length = utils.getAngleAndLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
+        var angle_length = utils.getAngleAndLength({x: x, y: y}, {x: e.clientX, y: e.clientY});
         sprite.rotation = - angle_length.angle.toGrad();
     }, false);
 
@@ -231,8 +235,9 @@ var BigGun = function(x, y, angle) {
         if (it.pointerId === e.pointerId) {
             it.pointerId = false;
 
-            var angle_length = utils.getAngleAndLength({x: x, y: y}, {x: e.clientX, y: e.clientY});
+            var angle_length = utils.getAngleAndLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
             it.shot(angle_length.angle, angle_length.length);
+            sprite.image = textures_static.big_gun();
         }
     });
     return this;
@@ -457,15 +462,28 @@ var soldierManager = {
 
 var stoneManager = {
     init: function() {
-        var stone1 = this.newStone(textures_static.stone1(), 300, 300);
-        var stone2 = this.newStone(textures_static.stone2(), 500, 300);
-        var stone3 = this.newStone(textures_static.stone3(), 400, 200);
-        var stone4 = this.newStone(textures_static.stone2(), 400, 400);
+        var stone1 = this.newStone(textures_static.stone1(), 450, 400);
+        var stone2 = this.newStone(textures_static.stone2(), 500, 900);
+        var stone3 = this.newStone(textures_static.stone3(), 550, 700);
+        var stone4 = this.newStone(textures_static.stone2(), 1450, 850);
+        var stone5 = this.newStone(textures_static.stone1(), 1300, 400);
+        var stone6 = this.newStone(textures_static.stone2(), 1250, 650);
+        var stone7 = this.newStone(textures_static.stone3(), 1050, 100);
+        var stone8 = this.newStone(textures_static.stone2(), 950, 300);
+        var stone9 = this.newStone(textures_static.stone1(), 1000, 700);
+        var stone10 = this.newStone(textures_static.stone2(), 800, 650);
+        
 
         this.stones.push(stone1);
         this.stones.push(stone2);
         this.stones.push(stone3);
         this.stones.push(stone4);
+        this.stones.push(stone5);
+        this.stones.push(stone6);
+        this.stones.push(stone7);
+        this.stones.push(stone8);
+        this.stones.push(stone9);
+        this.stones.push(stone10);
 
     },
     checkDotInStone: function(dot, stone) {
@@ -549,8 +567,8 @@ var stoneManager = {
 
 $(document).ready(function() {
 
-    var big_gun1 = new BigGun(70, HEIGHT/2, 90);
-    var big_gun2 = new BigGun(WIDTH - 70, HEIGHT/2, 270);
+    var big_gun1 = new BigGun(200, HEIGHT/2, 90);
+    var big_gun2 = new BigGun(WIDTH - 200, HEIGHT/2, 270);
     soldierManager.init();
     stoneManager.init();
 
