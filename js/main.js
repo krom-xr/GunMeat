@@ -297,6 +297,7 @@ var Soldier = function(x, y, angle) {
         if (it.pointerId === e.pointerId) {
             it.pointerId = false;
             it.start_time = new Date().getTime();
+            it.dots = it.optimizeDots(it.dots);
             it.setDotLengths(it.dots);
 
             animation.pushToRender(it);
@@ -340,6 +341,22 @@ var checkArrEq = _.throttle(checkArrayEqual, 50);
 //}
 
 Soldier.prototype = {
+    optimizeDots: function(dots, optimized) {
+        var it = this;
+        if (!optimized) {
+            optimized = [dots.shift()];
+        }
+        var last_dot = optimized[optimized.length - 1];
+        while (dots.length) {
+            var dot = dots.shift();
+            var len = utils.getLength(dot, last_dot);
+            if (len > 50) {
+                optimized.push(dot);
+                return it.optimizeDots(dots, optimized);
+            }
+        }
+        return optimized;
+    },
     checkStoneIntersect: function(dots, stones, callback) {
         var it = this;
         _.each(dots, function(dot, i) {
