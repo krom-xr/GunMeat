@@ -1,7 +1,7 @@
-/*global _, utils, requestAnimFrame, getImg, createjs, requestAnimationFrame */
+/*global _, utils, requestAnimFrame, getImg, createjs, requestAnimationFrame, textures_static */
 Number.prototype.toRad = function () { return this * Math.PI / 180; }; // градусы в радианы например: (90).toRad();
 Number.prototype.toGrad = function() { return this * 180 / Math.PI; }; // радианы в градусы
-var WIDTH, HEIGHT, stage;
+var WIDTH, HEIGHT, stage, container;
 var RENDER_ITEMS = [];
 
 //var worker = new window.Worker('js/webworker.js'); 
@@ -67,8 +67,14 @@ $(document).ready(function() {
     HEIGHT = $(window).height()-10;
 
     var canvas = $("#main_canvas").get(0);
+    var bgr = new createjs.Bitmap(textures_static.background());
+
     canvas.width = WIDTH; canvas.height = HEIGHT;
+
     stage = new createjs.Stage(canvas);
+    container = new createjs.Container();
+    stage.addChild(bgr);
+    stage.addChild(container);
     //createjs.Ticker.addEventListener("tick", function tick(event) {
         //animation.render();
         //stage.update(event); 

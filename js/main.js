@@ -1,4 +1,4 @@
-/*global createjs, PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT */
+/*global createjs, PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT, container */
 /*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH */
 
 var helper = {
@@ -191,18 +191,6 @@ Bullet.prototype = {
         var ylen = Math.abs(this.sprite.y - this.y0);
         return (xlen * xlen + ylen * ylen) >= this.distance * this.distance;
     },
-    setBulletMask: function(bullet, stone) {
-        if (!bullet.mask_container) {
-            var container = new PIXI.DisplayObjectContainer();
-            stage.addChild(container);
-            container.addChild(bullet);
-            var mask = new PIXI.Graphics();
-            mask.beginFill(0x0000FF, 1);
-            mask.drawRect(stone.position.x - 400, stone.position.y + 40, 1800, 800);
-            container.mask = mask;
-            bullet.mask_container = container;
-        }
-    },
     render: function() {
         if (this.isDistancePassed()) {
             this.renderBoom();
@@ -282,9 +270,9 @@ var Soldier = function(x, y, angle) {
         if (sold) { return false; }
 
         var trace = new createjs.Shape();
-        trace.graphics.beginStroke('rgba(10,10,10,1)');
+        trace.graphics.setStrokeStyle(10).beginStroke('rgba(255,0,255,1)');
         trace.graphics.moveTo(e.clientX, e.clientY);
-        stage.addChild(trace);
+        container.addChild(trace);
         it.trace = trace;
         it.pointerId = e.pointerId;
         it.dots = [];

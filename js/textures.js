@@ -2,17 +2,18 @@
 var getImg = function(src) {
     var img = new Image();
     img.after_load = function(callback) {
-        if (img.width) { 
+        if (img.width) {
             callback();
         } else {
             img.onload = callback;
         }
-    }
+    };
     img.src = src;
     return img;
 };
 
 var textures_static = {
+    background: function() { return getImg('img/background.png'); },
     bullet: function() { return getImg('img/ball.png'); },
     big_gun: function() { return getImg('img/cannon.png'); },
     soldier: function() { return getImg('img/soldier/soldier_1.png'); },// PIXI.Texture.fromImage('img/soldier/soldier_1.png'),
