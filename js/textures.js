@@ -27,6 +27,7 @@ var textures_static = {
 };
 var textures_sequence = {
     boom: animation.loadTextureSequence('img/explosion/Explosion_Sequence_A ', 27, 1),
-    soldier_run: animation.loadTextureSequence('img/soldier/run/soldier_', 8, 1)
+    soldier_run: animation.loadTextureSequence('img/soldier/run/soldier_', 8, 1),
+    shot: animation.loadTextureSequence('img/shot/shot', 8, 1)
 
 };

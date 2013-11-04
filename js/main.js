@@ -214,6 +214,7 @@ var BigGun = function(x, y, angle) {
         sprite.y = y;
         sprite.rotation = angle;
     });
+    this.sprite = sprite;
 
     //Пушка
     document.addEventListener('PointerDown', function(e) {
@@ -247,6 +248,11 @@ BigGun.prototype = {
     shot: function(angle, distance) {
         var bullet = new Bullet(angle, this.x, this.y, distance * BULLET_DISTANCE_COEFFICIENT);
         animation.pushToRender(bullet);
+        animation.pushToRender(this);
+    },
+    render: function() {
+    
+        animation.once(this.sprite, textures_sequence.shot)
     }
 };
 
