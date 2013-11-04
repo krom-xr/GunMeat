@@ -201,7 +201,7 @@ Bullet.prototype = {
 };
 
 
-var BigGun = function(x, y, angle) {
+var BigGun = function(x, y, angle, sight_color) {
     var it = this;
     this.x = x; this.y = y;
 
@@ -242,7 +242,7 @@ var BigGun = function(x, y, angle) {
         sprite.rotation = - angle_length.angle.toGrad();
 
         it.sight.graphics.clear();
-        it.sight.graphics.setStrokeStyle(1).beginStroke('rgba(0, 255, 0, 1)');
+        it.sight.graphics.setStrokeStyle(1).beginStroke(sight_color);
         it.sight.graphics.moveTo(18, 0);
         it.sight.graphics.lineTo(0, -angle_length.length * BULLET_DISTANCE_COEFFICIENT);
 
@@ -435,15 +435,12 @@ var flag = {
         container.addChild(flag_);
         
     }
-}
-
-
-
+};
 
 $(document).ready(function() {
     flag.init();
-    var big_gun1 = new BigGun(200, HEIGHT/2, 90);
-    var big_gun2 = new BigGun(WIDTH - 200, HEIGHT/2, 270);
+    var big_gun1 = new BigGun(200, HEIGHT/2, 90, 'rgb(0, 255, 0)');
+    var big_gun2 = new BigGun(WIDTH - 200, HEIGHT/2, 270, 'rgb(255, 0, 0)');
     soldierManager.init();
     stoneManager.init();
 
