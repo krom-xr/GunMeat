@@ -30,6 +30,7 @@ var Soldier = function(x, y, angle) {
         var trace = new createjs.Shape();
         trace.graphics.setStrokeStyle(10).beginStroke('rgba(255,0,255,1)');
         trace.graphics.moveTo(e.clientX, e.clientY);
+        trace.alpha = 0.8;
         container.addChild(trace);
         it.trace = trace;
         it.pointerId = e.pointerId;

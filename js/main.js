@@ -216,26 +216,18 @@ var BigGun = function(x, y, angle) {
     });
     this.sprite = sprite;
 
+    it.sight = new createjs.Shape();
+    it.sight.x = x;
+    it.sight.y = y;
+    it.sight.alpha = 0.5;
+    container.addChild(it.sight);
+
     //Пушка
     document.addEventListener('PointerDown', function(e) {
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
         if (is_near < 100) {
             it.pointerId = e.pointerId;
             sprite.image = textures_static.big_gun_active();
-
-
-            var sight = new createjs.Shape();
-            //console.log(sight);
-
-            //sight.x = x;
-            //sight.y = y;
-            sight.graphics.beginStroke('rgba(255,255,255,1)');
-            sight.graphics.moveTo(10, 10);
-            sight.graphics.lineTo(10, 10);
-            
-            container.addChild(sight);
-
-
         }
 
     });
@@ -248,6 +240,13 @@ var BigGun = function(x, y, angle) {
 
 
         sprite.rotation = - angle_length.angle.toGrad();
+
+        it.sight.graphics.clear();
+        it.sight.graphics.setStrokeStyle(1).beginStroke('rgba(0, 255, 0, 1)');
+        it.sight.graphics.moveTo(18, 0);
+        it.sight.graphics.lineTo(0, -angle_length.length * BULLET_DISTANCE_COEFFICIENT);
+
+        it.sight.rotation = sprite.rotation;
     }, false);
 
     document.addEventListener('PointerUp', function(e) {
@@ -260,6 +259,10 @@ var BigGun = function(x, y, angle) {
 
             it.shot(angle_length.angle, angle_length.length);
             sprite.image = textures_static.big_gun();
+            it.sight.alpha = 0.5;
+            setTimeout(function() {
+                //it.sight.graphics.clear();
+            }, 2000);
         }
     });
     it.shot_animation = _.throttle(animation.once, 10);
