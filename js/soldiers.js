@@ -86,6 +86,17 @@ Soldier.prototype = {
         it.trace.alpha = 0.5;
         animation.pushToRender(it);
     },
+    stop: function() {
+        var it = this;
+        it.unbrekable = true;
+        it.is_run = false;
+        it.sprite.image = textures_static.soldier_unbrekable();
+        console.log(it);
+
+        setTimeout(function() {
+            animation.removeFromRender(it);
+        }, 500);
+    },
     optimizeDots: function(dots, optimized) {
         var it = this;
         if (!optimized) {
@@ -161,7 +172,10 @@ Soldier.prototype = {
 
         var search_dot = _.find(dots, function(dot) { return dot.current_length > possible_length; });
         
-        if (!search_dot) { console.log('wha'); return false; }
+        if (!search_dot) {
+            it.stop();
+            return false; 
+        }
         var search_dot_prev = dots[_.indexOf(dots, search_dot) - 1];
 
         var lengthdiff = possible_length  - search_dot_prev.current_length;
@@ -178,13 +192,11 @@ Soldier.prototype = {
         this.animation_loop(this.sprite, textures_sequence.soldier_run);
     },
     renderDeath: function() { this.sprite.image = textures_static.soldier_killed(); },
-    renderStop: function() {
-        this.sprite.image = textures_static.soldier_killed();
-    },
+    renderStop: function() { this.sprite.image = textures_static.soldier_unbrekable(); },
     render: function() {
         if (this.is_dead) {
             this.renderDeath();
-        } else if (this.run) {
+        } else if (this.is_run) {
             this.renderRun();
         } else {
             this.renderStop();
