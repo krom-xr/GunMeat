@@ -222,6 +222,20 @@ var BigGun = function(x, y, angle) {
         if (is_near < 100) {
             it.pointerId = e.pointerId;
             sprite.image = textures_static.big_gun_active();
+
+
+            var sight = new createjs.Shape();
+            //console.log(sight);
+
+            //sight.x = x;
+            //sight.y = y;
+            sight.graphics.beginStroke('rgba(255,255,255,1)');
+            sight.graphics.moveTo(10, 10);
+            sight.graphics.lineTo(10, 10);
+            
+            container.addChild(sight);
+
+
         }
 
     });
@@ -229,6 +243,10 @@ var BigGun = function(x, y, angle) {
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
 
         var angle_length = utils.getAngleAndLength({x: x, y: y}, {x: e.clientX, y: e.clientY});
+
+
+
+
         sprite.rotation = - angle_length.angle.toGrad();
     }, false);
 
@@ -237,10 +255,14 @@ var BigGun = function(x, y, angle) {
             it.pointerId = false;
 
             var angle_length = utils.getAngleAndLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
+
+
+
             it.shot(angle_length.angle, angle_length.length);
             sprite.image = textures_static.big_gun();
         }
     });
+    it.shot_animation = _.throttle(animation.once, 10);
     return this;
 };
 
@@ -251,8 +273,14 @@ BigGun.prototype = {
         animation.pushToRender(this);
     },
     render: function() {
-    
-        animation.once(this.sprite, textures_sequence.shot)
+        var it = this;
+        it.shot_animation(this.sprite, textures_sequence.shot, function(data) {
+            if (data.finish) {
+                animation.removeFromRender(it);
+                it.sprite.image = textures_static.big_gun();
+            }
+            //console.log(data.finish);
+        });
     }
 };
 
