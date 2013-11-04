@@ -205,6 +205,8 @@ var BigGun = function(x, y, angle, sight_color) {
     var it = this;
     this.x = x; this.y = y;
 
+    it.sight_color = sight_color;
+
     var sprite = new createjs.Bitmap(textures_static.big_gun());
     stage.addChild(sprite);
     sprite.image.after_load(function() {
@@ -217,8 +219,8 @@ var BigGun = function(x, y, angle, sight_color) {
     this.sprite = sprite;
 
     it.sight = new createjs.Shape();
-    it.sight.x = x;
-    it.sight.y = y;
+    //it.sight.x = x;
+    //it.sight.y = y;
     it.sight.alpha = 0.5;
     container.addChild(it.sight);
 
@@ -241,12 +243,7 @@ var BigGun = function(x, y, angle, sight_color) {
 
         sprite.rotation = - angle_length.angle.toGrad();
 
-        it.sight.graphics.clear();
-        it.sight.graphics.setStrokeStyle(1).beginStroke(sight_color);
-        it.sight.graphics.moveTo(18, 0);
-        it.sight.graphics.lineTo(0, -angle_length.length * BULLET_DISTANCE_COEFFICIENT);
-
-        it.sight.rotation = sprite.rotation;
+        it.drawSight(x, y, angle_length);
     }, false);
 
     document.addEventListener('PointerUp', function(e) {
@@ -259,7 +256,7 @@ var BigGun = function(x, y, angle, sight_color) {
 
             it.shot(angle_length.angle, angle_length.length);
             sprite.image = textures_static.big_gun();
-            it.sight.alpha = 0.5;
+            it.sight.alpha = 0.8;
             setTimeout(function() {
                 //it.sight.graphics.clear();
             }, 2000);
@@ -270,6 +267,16 @@ var BigGun = function(x, y, angle, sight_color) {
 };
 
 BigGun.prototype = {
+    drawSight: function(x0,y0,angle_length) {
+        var it = this;
+        var x = x0 - angle_length.length * BULLET_DISTANCE_COEFFICIENT * Math.sin(angle_length.angle);
+        var y = y0 - angle_length.length * BULLET_DISTANCE_COEFFICIENT * Math.cos(angle_length.angle);
+
+        it.sight.graphics.clear();
+        it.sight.graphics.setStrokeStyle(1).beginStroke(it.sight_color);
+        it.sight.graphics.moveTo(x0 - 20 * Math.sin(angle_length.angle - 90), y0 - 20 * Math.cos(angle_length.angle - 90));
+        it.sight.graphics.lineTo(x, y);
+    },
     shot: function(angle, distance) {
         var bullet = new Bullet(angle, this.x, this.y, distance * BULLET_DISTANCE_COEFFICIENT);
         animation.pushToRender(bullet);
@@ -439,8 +446,8 @@ var flag = {
 
 $(document).ready(function() {
     flag.init();
-    var big_gun1 = new BigGun(200, HEIGHT/2, 90, 'rgb(0, 255, 0)');
-    var big_gun2 = new BigGun(WIDTH - 200, HEIGHT/2, 270, 'rgb(255, 0, 0)');
+    var big_gun1 = new BigGun(200, HEIGHT/2, 90, 'rgb(255, 255, 100)');
+    var big_gun2 = new BigGun(WIDTH - 200, HEIGHT/2, 270, 'rgb(100, 255, 100)');
     soldierManager.init();
     stoneManager.init();
 
