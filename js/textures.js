@@ -24,6 +24,9 @@ var textures_static = {
     stone1: function() { return getImg('img/stones/stone1.png'); },
     stone2: function() { return getImg('img/stones/stone2.png'); },
     stone3: function() { return getImg('img/stones/stone3.png'); },
+
+    flag_: function() { return getImg('img/flag_.png'); },
+    flag: function() { return getImg('img/flag.png'); },
 };
 var textures_sequence = {
     boom: animation.loadTextureSequence('img/explosion/Explosion_Sequence_A ', 27, 1),

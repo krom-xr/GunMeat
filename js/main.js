@@ -410,12 +410,38 @@ var stoneManager = {
     stones: [],
 };
 
+var flag = {
+    init: function() {
+        var flag = new createjs.Bitmap(textures_static.flag());
+        flag.x = WIDTH/2;
+        flag.y = HEIGHT/2;
+
+        flag.image.after_load(function() {
+            flag.regX  = flag.image.width * 0.5;
+            flag.regY = flag.image.height * 0.5;
+        });
+
+        stage.addChild(flag);
+
+        var flag_ = new createjs.Bitmap(textures_static.flag_());
+        flag_.x = WIDTH/2;
+        flag_.y = HEIGHT/2;
+
+        flag_.image.after_load(function() {
+            flag_.regX  = flag_.image.width * 0.5;
+            flag_.regY = flag_.image.height * 0.5;
+        });
+
+        container.addChild(flag_);
+        
+    }
+}
 
 
 
 
 $(document).ready(function() {
-
+    flag.init();
     var big_gun1 = new BigGun(200, HEIGHT/2, 90);
     var big_gun2 = new BigGun(WIDTH - 200, HEIGHT/2, 270);
     soldierManager.init();
