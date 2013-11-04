@@ -472,7 +472,17 @@ var stoneManager = {
         var stone8 = this.newStone(textures_static.stone2(), 950, 300);
         var stone9 = this.newStone(textures_static.stone1(), 1000, 700);
         var stone10 = this.newStone(textures_static.stone2(), 800, 650);
-        
+
+        var stone11 = this.newStone(textures_static.stone1(),   600  ,200  );
+        var stone12 = this.newStone(textures_static.stone2(),    750 ,50    );
+        var stone13 = this.newStone(textures_static.stone3(),   750 , 450  );
+        var stone14 = this.newStone(textures_static.stone2(),   1350 ,100  );
+        var stone15 = this.newStone(textures_static.stone1(),   1300, 250  );
+        var stone16 = this.newStone(textures_static.stone2(),   1050, 550   );
+        var stone17 = this.newStone(textures_static.stone3(),   1200, 800   );
+        var stone18 = this.newStone(textures_static.stone2(),   750 , 850   );
+        var stone19 = this.newStone(textures_static.stone1(),   1050, 950   );
+        var stone20 = this.newStone(textures_static.stone2(),  800 , 250  );
 
         this.stones.push(stone1);
         this.stones.push(stone2);
@@ -485,6 +495,17 @@ var stoneManager = {
         this.stones.push(stone9);
         this.stones.push(stone10);
 
+
+        this.stones.push(stone11);
+        this.stones.push(stone12);
+        this.stones.push(stone13);
+        this.stones.push(stone14);
+        this.stones.push(stone15);
+        this.stones.push(stone16);
+        this.stones.push(stone17);
+        this.stones.push(stone18);
+        this.stones.push(stone19);
+        this.stones.push(stone20);
     },
     checkDotInStone: function(dot, stone) {
         var w = stone.width_by_scale - 10, h = stone.height_by_scale - 10;
