@@ -3,7 +3,7 @@
 
 var helper = {
     _stones_map_ctx: false,
-    killSelf: function(ob) {
+    kill: function(ob) {
         animation.removeFromRender(ob);
         ob.sprite.alpha = 0;
         setTimeout(function() {
@@ -184,7 +184,7 @@ Bullet.prototype = {
         utils.setWHForEasel(it.sprite, wh, wh); // если подставить перед animantion_once - то происходит какой-то глюк - строб в начале взрыва
 
     },
-    killSelf: function() { helper.killSelf(this); },
+    killSelf: function() { helper.kill(this); },
     isDistancePassed: function() {
 
         var xlen = Math.abs(this.sprite.x - this.x0);
@@ -253,6 +253,7 @@ BigGun.prototype = {
 
 var Soldier = function(x, y, angle) {
     var it = this;
+    it.type = 'soldier';
     var sprite = new createjs.Bitmap(textures_static.soldier());
     stage.addChild(sprite);
     sprite.image.after_load(function() {
@@ -328,23 +329,6 @@ var Soldier = function(x, y, angle) {
     this.animation_loop = _.throttle(animation.loop, 10/SOLDIER_SPEED);
 };
 
-function checkArrayEqual(arr1, arr2) {
-    var check = true;
-    if (arr1.length !== arr2.length) { return false; }
-    for (var i = 0; i < arr1.length; i++) {
-        check = arr1[i] === arr2[i];
-        //check = arr1.pop() === arr2.pop();
-
-        if (!check) { return false; }
-    }
-    return true;
-}
-var checkArrEq = _.throttle(checkArrayEqual, 50);
-
-//var dotInRect = function(dot, rect) {
-    //if  dot.x
-//}
-
 Soldier.prototype = {
     optimizeDots: function(dots, optimized) {
         var it = this;
@@ -391,9 +375,11 @@ Soldier.prototype = {
         
     },
     killSelf: function() {
+        var it = this;
         this.is_dead = true;
+        this.sprite.image = textures_static.soldier_killed();
         soldierManager.killSoldier(this);
-        helper.killSelf(this);
+
     },
     getCurrentCoord: function() { return {x: this.sprite.x, y: this.sprite.y}; },
     setDotLengths: function(dots) {
@@ -432,8 +418,9 @@ Soldier.prototype = {
 
         this.animation_loop(this.sprite, textures_sequence.soldier_run);
     },
+    renderDeath: function() { this.sprite.image = textures_static.soldier_killed(); },
     render: function() {
-        this.renderRun();
+        this.is_dead ?  this.renderDeath() : this.renderRun();
     },
 };
 
@@ -457,6 +444,9 @@ var soldierManager = {
     },
     killSoldier: function(soldier) {
         utils.removeElFromArray(soldier, this.soldiers);
+        setTimeout(function() {
+            helper.kill(soldier);
+        }, 60000);
     }
 };
 

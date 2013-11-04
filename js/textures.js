@@ -17,7 +17,8 @@ var textures_static = {
     bullet: function() { return getImg('img/ball.png'); },
     big_gun: function() { return getImg('img/cannon.png'); },
     big_gun_active: function() { return getImg('img/cannon_active.png'); },
-    soldier: function() { return getImg('img/soldier/soldier_1.png'); },// PIXI.Texture.fromImage('img/soldier/soldier_1.png'),
+    soldier: function() { return getImg('img/soldier/soldier_1.png'); },
+    soldier_killed: function() { return getImg('img/is_dead.png'); },
 
     stone1: function() { return getImg('img/stones/stone1.png'); },
     stone2: function() { return getImg('img/stones/stone2.png'); },
