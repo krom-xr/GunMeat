@@ -1,11 +1,14 @@
 /*global createjs, PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT, container */
 /*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, helper, stoneManager */
-var Soldier = function(x, y, angle) {
+var Soldier = function(x, y, angle, player) {
     var it = this;
     it.type = 'soldier';
     it.unbrekable = true;
+    it.player = player;
 
-    var sprite = new createjs.Bitmap(textures_static.soldier());
+    it.soldier_run = it.player === 'player1' ? textures_sequence.soldier_run1 : textures_sequence.soldier_run2;
+
+    var sprite = new createjs.Bitmap(textures_static.soldier(player));
     stage.addChild(sprite);
     sprite.image.after_load(function() {
         sprite.regX  = sprite.image.width * 0.5;
@@ -92,7 +95,6 @@ Soldier.prototype = {
         it.unbrekable = true;
         it.is_run = false;
         it.sprite.image = textures_static.soldier_unbrekable();
-        console.log(it);
 
         setTimeout(function() {
             animation.removeFromRender(it);
@@ -148,7 +150,7 @@ Soldier.prototype = {
     killSelf: function() {
         var it = this;
         this.is_dead = true;
-        this.sprite.image = textures_static.soldier_killed();
+        this.sprite.image = textures_static.soldier_killed(this.player);
         soldierManager.killSoldier(this);
 
     },
@@ -175,7 +177,7 @@ Soldier.prototype = {
         
         if (!search_dot) {
             it.stop();
-            return false; 
+            return false;
         }
         var search_dot_prev = dots[_.indexOf(dots, search_dot) - 1];
 
@@ -190,7 +192,17 @@ Soldier.prototype = {
         this.sprite.x = xy.x;
         this.sprite.y = xy.y;
 
-        this.animation_loop(this.sprite, textures_sequence.soldier_run);
+        if (this.isFlagIntersect()) {
+            alert(this.player + " win!!!");
+        }
+
+
+        this.animation_loop(this.sprite, this.soldier_run );
+    },
+    isFlagIntersect: function() {
+        var len = utils.getLength({x: this.sprite.x, y: this.sprite.y}, {x: WIDTH/2, y: HEIGHT/2});
+        return len < 20;
+
     },
     renderDeath: function() { this.sprite.image = textures_static.soldier_killed(); },
     renderStop: function() { this.sprite.image = textures_static.soldier_unbrekable(); },
@@ -207,12 +219,21 @@ Soldier.prototype = {
 
 var soldierManager = {
     init: function() {
-        var soldier1 = new Soldier(50, 50, 0);
-        var soldier2 = new Soldier(150, 150, 190);
-        var soldier3 = new Soldier(250, 250, 45);
-        var soldier4 = new Soldier(350, 350, 20);
-        var soldier5 = new Soldier(550, 350, 569);
+        var left = 50;
+        var right = WIDTH - 50;
+        var soldier1 = new Soldier(left, 50,  90, 'player1');
+        var soldier2 = new Soldier(left, 150, 90, 'player1');
+        var soldier3 = new Soldier(left, 250, 90, 'player1');
+        var soldier4 = new Soldier(left, 350, 90, 'player1');
+        var soldier5 = new Soldier(left, 450, 90, 'player1');
         this.addSoldier(soldier1).addSoldier(soldier2).addSoldier(soldier3).addSoldier(soldier4).addSoldier(soldier5);
+
+        var soldier6 = new Soldier(right,  HEIGHT - 150, 270, 'player2');
+        var soldier7 = new Soldier(right,  HEIGHT - 250, 270, 'player2');
+        var soldier8 = new Soldier(right,  HEIGHT - 50,  270, 'player2');
+        var soldier9 = new Soldier(right,  HEIGHT - 350, 270, 'player2');
+        var soldier10 = new Soldier(right, HEIGHT - 450, 270, 'player2');
+        this.addSoldier(soldier6).addSoldier(soldier7).addSoldier(soldier8).addSoldier(soldier9).addSoldier(soldier10);
 
     },
     soldiers: [],
@@ -224,10 +245,21 @@ var soldierManager = {
         return this.soldiers;
     },
     killSoldier: function(soldier) {
+        var it = this;
         utils.removeElFromArray(soldier, this.soldiers);
         setTimeout(function() {
             helper.kill(soldier);
         }, 60000);
+
+        setTimeout(function() {
+            it.respawn(soldier.player);
+        }, 10000);
+    },
+    respawn: function(player) {
+        var x = 50, y = 50, angle = 90;
+        if (player === 'player2') {
+            x = WIDTH - x; y = HEIGHT - y, angle = 270;
+        }
+        this.addSoldier(new Soldier(x, y, angle, player));
     }
 };
-
