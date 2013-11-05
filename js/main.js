@@ -235,12 +235,7 @@ var BigGun = function(x, y, angle, sight_color) {
     });
     document.addEventListener('PointerMove', function(e) {
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
-
         var angle_length = utils.getAngleAndLength({x: x, y: y}, {x: e.clientX, y: e.clientY});
-
-
-
-
         sprite.rotation = - angle_length.angle.toGrad();
 
         it.drawSight(x, y, angle_length);
@@ -271,6 +266,21 @@ BigGun.prototype = {
         var it = this;
         var x = x0 - angle_length.length * BULLET_DISTANCE_COEFFICIENT * Math.sin(angle_length.angle);
         var y = y0 - angle_length.length * BULLET_DISTANCE_COEFFICIENT * Math.cos(angle_length.angle);
+
+        var intersect;
+        _.each(stoneManager.stones, function(stone) {
+            _.each(stoneManager.getSegments(stone), function(segment) {
+                //console.log('seg1', segment[0]);
+                //console.log('seg2', segment[1]);
+                intersect = utils.intersection(segment[0], segment[1], {x: x0, y: y0}, {x: x, y: y});
+                if (intersect) {
+                    x = intersect.x; y = intersect.y;
+                }
+
+            });
+
+        });
+
 
         it.sight.graphics.clear();
         it.sight.graphics.setStrokeStyle(1).beginStroke(it.sight_color);

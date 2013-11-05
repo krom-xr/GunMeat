@@ -285,5 +285,24 @@ utils.segmentIntersetion = function(start1, end1, start2, end2) {
     }
 
     var u = seg1_line2_start / (seg1_line2_start - seg1_line2_end);
-    return true;
+    return {x: start1.x + dir1.x, y: start1.y + dir1.y};
+};
+utils.intersection = function(A, B, C, D) {
+    var x1 = A.x, x2 = B.x, x3 = C.x, x4 = D.x;
+    var y1 = A.y, y2 = B.y, y3 = C.y, y4 = D.y;
+
+    var maxx1 = _.max([x1,x2]),  minx1 = _.min([x1, x2]);
+    var maxx2 = _.max([x3, x4]), minx2 = _.min([x3, x4]);
+    var maxy1 = _.max([y1, y2]), miny1 = _.min([y1, y2]);
+    var maxy2 = _.max([y3, y4]), miny2 = _.min([y3, y4]);
+
+    if (minx1 > maxx2 || maxx1 < minx2 || miny1 > maxy2 || maxy1 < miny2) { return false; }
+
+    var denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+    if (!denom) { return false; }
+    var Ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
+    var Ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
+    if (Ua > 1 || Ua < 0 || Ub > 1 || Ub < 0) { return false; }
+    return {x: x1 + Ua * (x2 - x1), y: y1 + Ua * (y2 - y1)};
+
 };
