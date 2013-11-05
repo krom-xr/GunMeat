@@ -61,12 +61,6 @@ var Bullet = function(angle, x, y, distance) {
 };
 
 Bullet.prototype = {
-    renderFly: function() {
-        var timediff = new Date().getTime() - this.start_time;
-        
-        this.sprite.x = this.x0 + BULLET_SPEED * timediff * Math.sin(this.angle);
-        this.sprite.y = this.y0 + BULLET_SPEED * timediff * Math.cos(this.angle);
-    },
     getStoneDots: function(stone) {
         var it = this;
         var far_dist = BULLET_DESTROY_RADIUS * 125;
@@ -165,9 +159,18 @@ Bullet.prototype = {
         it.on_stone = !!im_data[3];
         return it.on_stone;
     },
+    renderFly: function() {
+        var timediff = new Date().getTime() - this.start_time;
+        
+        this.sprite.x = this.x0 + BULLET_SPEED * timediff * Math.sin(this.angle);
+        this.sprite.y = this.y0 + BULLET_SPEED * timediff * Math.cos(this.angle);
+    },
     renderBoom: function() {
         var it = this;
         var wh = BULLET_DESTROY_RADIUS * 2;
+
+        this.sprite.x = this.x0 + this.distance * Math.sin(this.angle);
+        this.sprite.y = this.y0 + this.distance * Math.cos(this.angle);
 
         it.animation_once(it.sprite, textures_sequence.boom, function(data) {
             if (data.finish) {
@@ -186,10 +189,11 @@ Bullet.prototype = {
     },
     killSelf: function() { helper.kill(this); },
     isDistancePassed: function() {
-
+        if (this.is_distance_passed) { return true; }
         var xlen = Math.abs(this.sprite.x - this.x0);
         var ylen = Math.abs(this.sprite.y - this.y0);
-        return (xlen * xlen + ylen * ylen) >= this.distance * this.distance;
+        this.is_distance_passed = (xlen * xlen + ylen * ylen) >= this.distance * this.distance;
+        return this.is_distance_passed;
     },
     render: function() {
         if (this.isDistancePassed()) {
@@ -219,9 +223,7 @@ var BigGun = function(x, y, angle, sight_color) {
     this.sprite = sprite;
 
     it.sight = new createjs.Shape();
-    //it.sight.x = x;
-    //it.sight.y = y;
-    it.sight.alpha = 0.5;
+    it.sight.alpha = 0.8;
     container.addChild(it.sight);
 
     //Пушка
@@ -237,7 +239,6 @@ var BigGun = function(x, y, angle, sight_color) {
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
         var angle_length = utils.getAngleAndLength({x: x, y: y}, {x: e.clientX, y: e.clientY});
         sprite.rotation = - angle_length.angle.toGrad();
-
         it.drawSight(x, y, angle_length);
     }, false);
 
@@ -245,16 +246,13 @@ var BigGun = function(x, y, angle, sight_color) {
         if (it.pointerId === e.pointerId) {
             it.pointerId = false;
 
-            var angle_length = utils.getAngleAndLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
+            var angle_length = utils.getAngleAndLength({x: x, y: y}, {x: e.clientX, y: e.clientY});
+            var xy = it.getIntersectedXY(x, y, angle_length);
 
+            angle_length = utils.getAngleAndLength({x: x, y: y}, {x: xy.x, y: xy.y});
 
-
-            it.shot(angle_length.angle, angle_length.length);
+            it.shot(angle_length.angle, angle_length.length - 3);
             sprite.image = textures_static.big_gun();
-            it.sight.alpha = 0.8;
-            setTimeout(function() {
-                //it.sight.graphics.clear();
-            }, 2000);
         }
     });
     it.shot_animation = _.throttle(animation.once, 10);
@@ -262,25 +260,24 @@ var BigGun = function(x, y, angle, sight_color) {
 };
 
 BigGun.prototype = {
-    drawSight: function(x0,y0,angle_length) {
-        var it = this;
+    getIntersectedXY: function(x0, y0, angle_length) {
         var x = x0 - angle_length.length * BULLET_DISTANCE_COEFFICIENT * Math.sin(angle_length.angle);
         var y = y0 - angle_length.length * BULLET_DISTANCE_COEFFICIENT * Math.cos(angle_length.angle);
 
-        var intersect;
         _.each(stoneManager.stones, function(stone) {
             _.each(stoneManager.getSegments(stone), function(segment) {
-                //console.log('seg1', segment[0]);
-                //console.log('seg2', segment[1]);
-                intersect = utils.intersection(segment[0], segment[1], {x: x0, y: y0}, {x: x, y: y});
+                var intersect = utils.intersection(segment[0], segment[1], {x: x0, y: y0}, {x: x, y: y});
                 if (intersect) {
                     x = intersect.x; y = intersect.y;
                 }
-
             });
-
         });
-
+        return {x: x, y: y};
+    },
+    drawSight: function(x0, y0, angle_length) {
+        var it = this;
+        var xy = it.getIntersectedXY(x0, y0, angle_length);
+        var x = xy.x, y = xy.y;
 
         it.sight.graphics.clear();
         it.sight.graphics.setStrokeStyle(1).beginStroke(it.sight_color);
@@ -288,7 +285,7 @@ BigGun.prototype = {
         it.sight.graphics.lineTo(x, y);
     },
     shot: function(angle, distance) {
-        var bullet = new Bullet(angle, this.x, this.y, distance * BULLET_DISTANCE_COEFFICIENT);
+        var bullet = new Bullet(angle, this.x, this.y, distance);
         animation.pushToRender(bullet);
         animation.pushToRender(this);
     },
