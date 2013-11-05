@@ -451,10 +451,52 @@ var flag = {
     }
 };
 
+var Slider = function(x, y, gun) {
+    var it = this;
+    var sprite = new createjs.Bitmap(textures_static.big_gun());
+    stage.addChild(sprite);
+    sprite.x = x;
+    sprite.y = y;
+
+    document.addEventListener('PointerDown', function(e) {
+        var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
+        if (is_near < 100) {
+            it.pointerId = e.pointerId;
+            it.start_pos = {x: e.clientX, y: e.clientY};
+        }
+
+    });
+    document.addEventListener('PointerMove', function(e) {
+        if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
+        var length = utils.getLength({x: e.clientX, y: e.clientY}, it.start_pos)/300;
+        if (e.clientY < it.start_pos.y) { length = -length; }
+
+        gun.sprite.y = gun.sprite.y + length;
+    }, false);
+
+    document.addEventListener('PointerUp', function(e) {
+        if (it.pointerId === e.pointerId) {
+            it.pointerId = false;
+        }
+    });
+
+}
+
+var gunManager = {
+    init: function() {
+        var big_gun1 = new BigGun(200, HEIGHT/2, 90, 'rgb(255, 255, 100)');
+        var big_gun2 = new BigGun(WIDTH - 200, HEIGHT/2, 270, 'rgb(100, 255, 100)');
+
+        new Slider(100, 100, big_gun1);
+        //new Slider(big_gun2);
+
+    }
+}
+
 $(document).ready(function() {
+
     flag.init();
-    var big_gun1 = new BigGun(200, HEIGHT/2, 90, 'rgb(255, 255, 100)');
-    var big_gun2 = new BigGun(WIDTH - 200, HEIGHT/2, 270, 'rgb(100, 255, 100)');
+    gunManager.init();
     soldierManager.init();
     stoneManager.init();
 
