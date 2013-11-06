@@ -35,6 +35,7 @@ var BigGun = function(x, y, angle, sight_color) {
         var angle_length = utils.getAngleAndLength({x: it.sprite.x, y: it.sprite.y}, {x: e.clientX, y: e.clientY});
         sprite.rotation = - angle_length.angle.toGrad();
         it.drawSight(it.sprite.x, it.sprite.y, angle_length);
+        it.angle_length = angle_length;
     }, false);
 
     document.addEventListener('PointerUp', function(e) {
@@ -55,6 +56,13 @@ var BigGun = function(x, y, angle, sight_color) {
 };
 
 BigGun.prototype = {
+    moveGun: function() {
+        var it = this;
+        it.drawSight(it.sprite.x, it.sprite.y, it.angle_length);
+
+
+
+    },
     getIntersectedXY: function(x0, y0, angle_length) {
         var x = x0 - angle_length.length * BULLET_DISTANCE_COEFFICIENT * Math.sin(angle_length.angle);
         var y = y0 - angle_length.length * BULLET_DISTANCE_COEFFICIENT * Math.cos(angle_length.angle);
@@ -110,6 +118,7 @@ var Slider = function(x, y, gun) {
     });
 
     document.addEventListener('PointerDown', function(e) {
+        e.stopPropagation(); e.preventDefault();
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
         if (is_near < 100) {
             it.pointerId = e.pointerId;
@@ -118,15 +127,18 @@ var Slider = function(x, y, gun) {
 
     });
     document.addEventListener('PointerMove', function(e) {
+        e.stopPropagation(); e.preventDefault();
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
         var length = utils.getLength({x: e.clientX, y: e.clientY}, it.start_pos)/300;
         if (e.clientY < it.start_pos.y) { length = -length; }
         var y = gun.sprite.y + length;
         if (y > HEIGHT - 180 || y < 180) { return false; }
         gun.sprite.y = y;
+        gun.moveGun();
     }, false);
 
     document.addEventListener('PointerUp', function(e) {
+        e.stopPropagation(); e.preventDefault();
         if (it.pointerId === e.pointerId) {
             it.pointerId = false;
         }
