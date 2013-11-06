@@ -29,6 +29,8 @@ var textures_static = {
 
     flag_: function() { return getImg('img/flag_.png'); },
     flag: function() { return getImg('img/flag.png'); },
+
+    slider: function() { return getImg('img/slider.png'); }
 };
 var textures_sequence = {
     boom: animation.loadTextureSequence('img/explosion/Explosion_Sequence_A ', 27, 1),
