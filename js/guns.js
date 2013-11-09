@@ -35,6 +35,7 @@ var BigGun = function(x, y, angle, sight_color) {
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: it.sprite.x, y: it.sprite.y});
         if (is_near < 100) {
             if (it.pointerId && it.pointerId !== e.pointerId) {
+                it.pointer_moveId = e.pointerId;
                 it.move_mode = true;
             } else {
                 it.pointerId = e.pointerId;
@@ -46,7 +47,8 @@ var BigGun = function(x, y, angle, sight_color) {
     document.addEventListener('PointerMove', function(e) {
         if (!it.pointerId) { return false; }
 
-        if (it.move_mode) {
+        if (it.pointer_moveId === e.pointerId) {
+            //if (e.pointerId !== it.pointer_moveId) { return false; }
             var y = e.clientY;
             if (y > HEIGHT - 180 || y < 180) { return false; }
             it.sprite.y = y;
@@ -62,6 +64,11 @@ var BigGun = function(x, y, angle, sight_color) {
     }, false);
 
     document.addEventListener('PointerUp', function(e) {
+        if (it.pointer_moveId === e.pointerId) {
+            it.pointer_moveId = false;
+            it.move_mode = false;
+        }
+        //if (it.move_mode) { return false; }
         if (it.pointerId === e.pointerId) {
             it.pointerId = false; //TODO вернуть на место
 
