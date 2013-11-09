@@ -402,10 +402,10 @@ var player = {
 
     },
     playlist: [
-        "audio/player/mv1.mp3",
-        "audio/player/mv2.mp3",
-        "audio/player/mv3.mp3",
-        "audio/player/mv4.mp3",
+        "audio/player/mv1.ogg",
+        "audio/player/mv2.ogg",
+        "audio/player/mv3.ogg",
+        "audio/player/mv4.ogg",
     ],
     play: function() {
         var src = this.audio.data_src;
