@@ -73,7 +73,7 @@ var sounds = {
             this.play();
         }, false);
 
-        run.src = 'audio/gun_rotate.mp3';
+        run.src = 'audio/gun_rotate.ogg';
         return run;
     },
     //squeak: function() {
