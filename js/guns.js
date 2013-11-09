@@ -35,8 +35,7 @@ var BigGun = function(x, y, angle, sight_color) {
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: it.sprite.x, y: it.sprite.y});
         if (is_near < 100) {
             if (it.pointerId && it.pointerId !== e.pointerId) {
-                console.log('yes');
-
+                it.move_mode = true;
             } else {
                 it.pointerId = e.pointerId;
                 sprite.image = textures_static.big_gun_active();
@@ -45,12 +44,21 @@ var BigGun = function(x, y, angle, sight_color) {
 
     });
     document.addEventListener('PointerMove', function(e) {
-        if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
-        gun_rotate.play();
-        var angle_length = utils.getAngleAndLength({x: it.sprite.x, y: it.sprite.y}, {x: e.clientX, y: e.clientY});
-        sprite.rotation = - angle_length.angle.toGrad();
-        it.drawSight(it.sprite.x, it.sprite.y, angle_length);
-        it.angle_length = angle_length;
+        if (!it.pointerId) { return false; }
+
+        if (it.move_mode) {
+            var y = e.clientY;
+            if (y > HEIGHT - 180 || y < 180) { return false; }
+            it.sprite.y = y;
+            it.moveGun();
+
+        } else {
+            gun_rotate.play();
+            var angle_length = utils.getAngleAndLength({x: it.sprite.x, y: it.sprite.y}, {x: e.clientX, y: e.clientY});
+            sprite.rotation = - angle_length.angle.toGrad();
+            it.drawSight(it.sprite.x, it.sprite.y, angle_length);
+            it.angle_length = angle_length;
+        }
     }, false);
 
     document.addEventListener('PointerUp', function(e) {
