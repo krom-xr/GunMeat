@@ -31,12 +31,32 @@
         }
 
         body { margin: 0; padding: 0}
+        .player {
+            position: fixed;
+            left: 50%;
+            margin-left: -50px;
+            bottom: 20px;
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+        }
+        .player.play {
+            background-image: url('img/player/play.png');
+        }
+        .player.pause {
+            background-image: url('img/player/pause.png');
+        }
     </style>
     
 </head>
 <body id="body">
 
+    <div id="player" class="player play pause">
+        <audio></audio>
+    </div>
+
     <canvas id="main_canvas" width='1000' height='800'></canvas>
+
     
     <div style="display: none">
         <audio src="audio/gun_rotate.mp3"></audio>

@@ -379,7 +379,58 @@ var flag = {
     }
 };
 
+var player = {
+    init: function() {
+        this.$id = $('#player');
+        this.audio = this.$id.find('audio').get(0);
+        this.play();
+
+
+        var it = this;
+        this.audio.addEventListener('ended', function() { it.play(); });
+
+        this.$id.click(function() {
+            var $this = $(this);
+            if ($this.hasClass('pause')) {
+                $this.removeClass('pause');
+                it.audio.pause();
+            } else {
+                $this.addClass('pause');
+                it.audio.play();
+            }
+        });
+
+    },
+    playlist: [
+        "audio/player/1.mp3",
+        "audio/player/2.mp3",
+        "audio/player/3.mp3",
+        "audio/player/4.mp3",
+        "audio/player/5.mp3",
+    ],
+    play: function() {
+        var src = this.audio.data_src;
+        var index = _.indexOf(this.playlist, this.audio.data_src);
+
+        if (index === -1 || index === 4) {
+            index = 0;
+        } else {
+            index = index + 1;
+        }
+
+        this.audio.src = this.playlist[index];
+        this.audio.data_src = this.playlist[index];
+        console.log(this.audio.src);
+        this.audio.play();
+    }
+
+};
+
 $(document).ready(function() {
+
+    setTimeout(function() {
+        player.init();
+    }, 2000);
 
     flag.init();
     gunManager.init();
@@ -393,8 +444,6 @@ $(document).ready(function() {
 
 
 });
-
-
 $(document).on('contextmenu', function(e) { e.preventDefault(); e.stopPropagation(); });
 
 

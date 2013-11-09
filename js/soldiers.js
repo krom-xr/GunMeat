@@ -1,6 +1,6 @@
 /*global createjs, PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT, container */
 /*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, helper, stoneManager, sounds  */
-var Soldier = function(x, y, angle, player) {
+var Soldier = function(x, y, angle, player, trace_color) {
     var it = this;
     it.type = 'soldier';
     it.unbrekable = true;
@@ -31,7 +31,7 @@ var Soldier = function(x, y, angle, player) {
         if (sold) { return false; }
 
         var trace = new createjs.Shape();
-        trace.graphics.setStrokeStyle(10).beginStroke('rgba(255,0,255,1)');
+        trace.graphics.setStrokeStyle(10).beginStroke(trace_color);
         trace.graphics.moveTo(e.clientX, e.clientY);
         trace.alpha = 0.8;
         container.addChild(trace);
@@ -227,18 +227,21 @@ var soldierManager = {
     init: function() {
         var left = 50;
         var right = WIDTH - 50;
-        var soldier1 = new Soldier(left, 50,  90, 'player1');
-        var soldier2 = new Soldier(left, 150, 90, 'player1');
-        var soldier3 = new Soldier(left, 250, 90, 'player1');
-        var soldier4 = new Soldier(left, 350, 90, 'player1');
-        var soldier5 = new Soldier(left, 450, 90, 'player1');
+
+        var trace_color1 = 'rgba(255,255,100,1)';
+        var trace_color2 = 'rgb(100, 255, 100)';
+        var soldier1 = new Soldier(left, HEIGHT - 50,  90, 'player1', trace_color1);
+        var soldier2 = new Soldier(left, HEIGHT - 150, 90, 'player1', trace_color1);
+        var soldier3 = new Soldier(left, HEIGHT - 250, 90, 'player1', trace_color1);
+        var soldier4 = new Soldier(left, HEIGHT - 350, 90, 'player1', trace_color1);
+        var soldier5 = new Soldier(left, HEIGHT - 450, 90, 'player1', trace_color1);
         this.addSoldier(soldier1).addSoldier(soldier2).addSoldier(soldier3).addSoldier(soldier4).addSoldier(soldier5);
 
-        var soldier6 = new Soldier(right,  HEIGHT - 150, 270, 'player2');
-        var soldier7 = new Soldier(right,  HEIGHT - 250, 270, 'player2');
-        var soldier8 = new Soldier(right,  HEIGHT - 50,  270, 'player2');
-        var soldier9 = new Soldier(right,  HEIGHT - 350, 270, 'player2');
-        var soldier10 = new Soldier(right, HEIGHT - 450, 270, 'player2');
+        var soldier6 = new Soldier(right,  150, 270, 'player2', trace_color2);
+        var soldier7 = new Soldier(right,  250, 270, 'player2', trace_color2);
+        var soldier8 = new Soldier(right,  50,  270, 'player2', trace_color2);
+        var soldier9 = new Soldier(right,  350, 270, 'player2', trace_color2);
+        var soldier10 = new Soldier(right, 450, 270, 'player2', trace_color2);
         this.addSoldier(soldier6).addSoldier(soldier7).addSoldier(soldier8).addSoldier(soldier9).addSoldier(soldier10);
 
     },
