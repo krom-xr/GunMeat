@@ -47,10 +47,10 @@ var textures_sequence = {
 };
 
 var sounds = {
-    //explosion: getSound('audio/explosion.wav'),
-    explosion: function() { getSound('audio/explosion.wav').play(); },
-    gunShot: function() { getSound('audio/shot.wav').play(); },
-    dead: function() { getSound('audio/dead.wav').play(); },
+    explosion: function() { getSound('audio/explosion.ogg').play(); },
+    gunShot: function() { getSound('audio/shot.ogg').play(); },
+    dead: function() { getSound('audio/dead.ogg').play(); },
+    squeak: function() { getSound('audio/squeking_move.ogg').play(); },
     run: function() {
         var run = document.createElement('audio');
         run.preload = true;
@@ -60,10 +60,9 @@ var sounds = {
             this.play();
         }, false);
 
-        run.src = 'audio/run.wav';
+        run.src = 'audio/run.ogg';
         return run;
     },
-    squeak: function() { getSound('audio/squeking_move.wav').play(); },
     gun_rotate: function() {
         var run = document.createElement('audio');
         run.preload = true;
@@ -85,7 +84,7 @@ var sounds = {
             ////this.play();
         ////}, false);
 
-        //sq.src = 'audio/squeking_move.wav';
+        //sq.src = 'audio/squeking_move.ogg';
         //return sq;
     //}
 
