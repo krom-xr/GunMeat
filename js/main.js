@@ -389,6 +389,19 @@ var player = {
         var it = this;
         this.audio.addEventListener('ended', function() { it.play(); });
 
+        document.addEventListener('PointerDown', function(e) {
+            if ($(e.toElement).hasClass('player')) {
+                var $this = $(e.toElement);
+                if ($this.hasClass('pause')) {
+                    $this.removeClass('pause');
+                    it.audio.pause();
+                } else {
+                    $this.addClass('pause');
+                    it.audio.play();
+                }    
+            }
+        }, false);
+
         this.$id.click(function() {
             var $this = $(this);
             if ($this.hasClass('pause')) {
