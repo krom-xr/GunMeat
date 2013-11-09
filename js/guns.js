@@ -1,5 +1,5 @@
 /*global createjs, PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT, container */
-/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, soldierManager, stoneManager, Bullet*/
+/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, soldierManager, stoneManager, Bullet, sounds*/
 var BigGun = function(x, y, angle, sight_color) {
     var it = this;
     this.x = x; this.y = y;
@@ -21,6 +21,7 @@ var BigGun = function(x, y, angle, sight_color) {
     it.sight.alpha = 0.8;
     container.addChild(it.sight);
 
+    var gun_rotate = sounds.gun_rotate();
     //Пушка
     document.addEventListener('PointerDown', function(e) {
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: it.sprite.x, y: it.sprite.y});
@@ -32,6 +33,7 @@ var BigGun = function(x, y, angle, sight_color) {
     });
     document.addEventListener('PointerMove', function(e) {
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
+        gun_rotate.play();
         var angle_length = utils.getAngleAndLength({x: it.sprite.x, y: it.sprite.y}, {x: e.clientX, y: e.clientY});
         sprite.rotation = - angle_length.angle.toGrad();
         it.drawSight(it.sprite.x, it.sprite.y, angle_length);
@@ -47,6 +49,8 @@ var BigGun = function(x, y, angle, sight_color) {
 
             angle_length = utils.getAngleAndLength({x: it.sprite.x, y: it.sprite.y}, {x: xy.x, y: xy.y});
 
+            gun_rotate.pause();
+            sounds.gunShot();
             it.shot(angle_length.angle, angle_length.length - 3);
             sprite.image = textures_static.big_gun();
         }
@@ -58,7 +62,7 @@ var BigGun = function(x, y, angle, sight_color) {
 BigGun.prototype = {
     moveGun: function() {
         var it = this;
-        it.drawSight(it.sprite.x, it.sprite.y, it.angle_length);
+        it.angle_length && it.drawSight(it.sprite.x, it.sprite.y, it.angle_length);
 
 
 
@@ -117,18 +121,27 @@ var Slider = function(x, y, gun) {
         sprite.alpha = 0.8;
     });
 
+    var squeak_play;
+
     document.addEventListener('PointerDown', function(e) {
         e.stopPropagation(); e.preventDefault();
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: x, y: y});
         if (is_near < 100) {
             it.pointerId = e.pointerId;
             it.start_pos = {x: e.clientX, y: e.clientY};
+            sprite.alpha = 0.5;
         }
 
     });
     document.addEventListener('PointerMove', function(e) {
         e.stopPropagation(); e.preventDefault();
         if (!it.pointerId || it.pointerId !== e.pointerId) { return false; }
+
+        if (!squeak_play) {
+            sounds.squeak();
+            squeak_play = true;
+        }
+
         var length = utils.getLength({x: e.clientX, y: e.clientY}, it.start_pos)/300;
         if (e.clientY < it.start_pos.y) { length = -length; }
         var y = gun.sprite.y + length;
@@ -141,6 +154,10 @@ var Slider = function(x, y, gun) {
         e.stopPropagation(); e.preventDefault();
         if (it.pointerId === e.pointerId) {
             it.pointerId = false;
+
+            sprite.alpha = 0.8;
+            //squeak.pause();
+            squeak_play = false;
         }
     });
 

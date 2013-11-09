@@ -1,5 +1,5 @@
 /*global createjs, PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT, container */
-/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, soldierManager, gunManager */
+/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, soldierManager, gunManager, sounds */
 var helper = {
     _stones_map_ctx: false,
     kill: function(ob) {
@@ -169,6 +169,7 @@ Bullet.prototype = {
         var it = this;
         var wh = BULLET_DESTROY_RADIUS * 2;
 
+        this.playSound();
         this.sprite.x = this.x0 + this.distance * Math.sin(this.angle);
         this.sprite.y = this.y0 + this.distance * Math.cos(this.angle);
 
@@ -188,8 +189,15 @@ Bullet.prototype = {
 
     },
     killSelf: function() { helper.kill(this); },
+    playSound: function() {
+        if (this.is_sound_played) { return false; }
+        this.is_sound_played = true;
+        sounds.explosion(); //.play();
+    },
     isDistancePassed: function() {
         if (this.is_distance_passed) { return true; }
+
+        //sounds.explosion.stop();
         var xlen = Math.abs(this.sprite.x - this.x0);
         var ylen = Math.abs(this.sprite.y - this.y0);
         this.is_distance_passed = (xlen * xlen + ylen * ylen) >= this.distance * this.distance;
@@ -267,7 +275,22 @@ var stoneManager = {
         var y = sprite.y;
         var half_w = sprite.width_by_scale/2 - 10;
         var half_h = sprite.height_by_scale/2 - 10;
-        sprite.versites = [{x: x - half_w, y: y - half_h}, {x: x + half_w, y: y - half_h}, {x: x + half_w, y: y + half_h}, {x: x - half_w, y: y + half_h}];
+        sprite.versites = [
+            //{x: x - 33, y: y - 27},
+            //{x: x - 8, y: y - 29},
+            //{x: x - 8, y: y - 29},
+            //{x: x + 31, y: y - 38},
+            //{x: x + 31, y: y - 38},
+            //{x: x + 31, y: y + 38},
+            //{x: x - 45, y: y + 26},
+
+
+            {x: x - half_w, y: y - half_h},
+            {x: x + half_w, y: y - half_h},
+            {x: x + half_w, y: y + half_h},
+            {x: x - half_w, y: y + half_h}
+        ];
+
         return sprite.versites;
     },
     getMaxMinAngleDot: function(sprite, x, y) {
@@ -362,6 +385,11 @@ $(document).ready(function() {
     gunManager.init();
     soldierManager.init();
     stoneManager.init();
+
+
+    //var audio = document.createElement('audio');
+    //audio.src = "audio/explosion.wav";
+    //audio.play();
 
 
 });

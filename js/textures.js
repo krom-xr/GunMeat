@@ -12,6 +12,12 @@ var getImg = function(src) {
     return img;
 };
 
+var getSound = function(src) {
+    var audio = document.createElement('audio');
+    audio.src = src;
+    return audio;
+};
+
 var textures_static = {
     background: function() { return getImg('img/background.png'); },
     bullet: function() { return getImg('img/ball.png'); },
@@ -37,5 +43,50 @@ var textures_sequence = {
     soldier_run1: animation.loadTextureSequence('img/soldier/run1/soldier_', 8, 1),
     soldier_run2: animation.loadTextureSequence('img/soldier/run2/soldier_', 8, 1),
     shot: animation.loadTextureSequence('img/shot/shot', 8, 1)
+
+};
+
+var sounds = {
+    //explosion: getSound('audio/explosion.wav'),
+    explosion: function() { getSound('audio/explosion.wav').play(); },
+    gunShot: function() { getSound('audio/shot.wav').play(); },
+    dead: function() { getSound('audio/dead.wav').play(); },
+    run: function() {
+        var run = document.createElement('audio');
+        run.preload = true;
+        run.addEventListener('ended', function() {
+            this.currentTime = 0;
+            this.src = this.src;
+            this.play();
+        }, false);
+
+        run.src = 'audio/run.wav';
+        return run;
+    },
+    squeak: function() { getSound('audio/squeking_move.wav').play(); },
+    gun_rotate: function() {
+        var run = document.createElement('audio');
+        run.preload = true;
+        run.addEventListener('ended', function() {
+            this.currentTime = 0;
+            this.src = this.src;
+            this.play();
+        }, false);
+
+        run.src = 'audio/gun_rotate.mp3';
+        return run;
+    },
+    //squeak: function() {
+        //var sq = document.createElement('audio');
+        //sq.preload = true;
+        ////sq.addEventListener('ended', function() {
+            ////this.currentTime = 0;
+            ////this.src = this.src;
+            ////this.play();
+        ////}, false);
+
+        //sq.src = 'audio/squeking_move.wav';
+        //return sq;
+    //}
 
 };

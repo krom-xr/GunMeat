@@ -1,5 +1,5 @@
 /*global createjs, PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT, container */
-/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, helper, stoneManager */
+/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, helper, stoneManager, sounds  */
 var Soldier = function(x, y, angle, player) {
     var it = this;
     it.type = 'soldier';
@@ -69,6 +69,7 @@ var Soldier = function(x, y, angle, player) {
 
     stage.addChild(sprite);
 
+    this.run_sound = sounds.run();
 
     this.angle = angle;
     this.sprite = sprite;
@@ -89,6 +90,7 @@ Soldier.prototype = {
         it.start_time = new Date().getTime();
         it.trace.alpha = 0.5;
         animation.pushToRender(it);
+        this.run_sound.play();
     },
     stop: function() {
         var it = this;
@@ -99,6 +101,8 @@ Soldier.prototype = {
         setTimeout(function() {
             animation.removeFromRender(it);
         }, 500);
+
+        this.run_sound.pause();
     },
     optimizeDots: function(dots, optimized) {
         var it = this;
@@ -151,6 +155,8 @@ Soldier.prototype = {
         var it = this;
         this.is_dead = true;
         this.sprite.image = textures_static.soldier_killed(this.player);
+        this.run_sound.pause();
+        sounds.dead();
         soldierManager.killSoldier(this);
 
     },
