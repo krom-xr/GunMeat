@@ -1,5 +1,5 @@
 /*global createjs, PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT, container */
-/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, soldierManager, stoneManager, Bullet, sounds*/
+/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, soldierManager, stoneManager, Bullet, sounds, CHARGE_TIME*/
 var BigGun = function(x, y, angle, sight_color) {
     var it = this;
     this.x = x; this.y = y;
@@ -17,9 +17,17 @@ var BigGun = function(x, y, angle, sight_color) {
     });
     this.sprite = sprite;
 
+    var blink = new createjs.Shape();
+
+    it.blink = blink;
+    stage.addChild(blink);
+
     it.sight = new createjs.Shape();
     it.sight.alpha = 0.8;
     container.addChild(it.sight);
+
+
+    animation.pushToRender(this);
 
     var gun_rotate = sounds.gun_rotate();
     //Пушка
@@ -56,6 +64,7 @@ var BigGun = function(x, y, angle, sight_color) {
         }
     });
     it.shot_animation = _.throttle(animation.once, 10);
+    it.charge_mode = new Date().getTime();
     return this;
 };
 
@@ -91,20 +100,62 @@ BigGun.prototype = {
         it.sight.graphics.moveTo(x0 - 20 * Math.sin(angle_length.angle - 90), y0 - 20 * Math.cos(angle_length.angle - 90));
         it.sight.graphics.lineTo(x, y);
     },
+    chargeModeBlink: function(blink) {
+        if (new Date().getTime() - blink.timer > 100) {
+            blink.timer = new Date().getTime();
+            if (blink.color === 'red') {
+                blink.color = 'black';
+            } else {
+                blink.color = 'red';
+            }
+        }
+    },
+    setBlinkColor: function(blink) {
+        if (!blink.timer) { blink.timer = new Date().getTime(); }
+        if (new Date().getTime() - this.charge_mode > CHARGE_TIME) {
+            this.charge_mode = false;
+            blink.color = 'rgb(100, 255, 100)';
+        } else {
+            this.chargeModeBlink(blink);
+        }
+        blink.graphics.beginFill(blink.color);
+    },
+    drawBlink: function(x0, y0, angle_length) {
+
+        
+
+        this.blink.alpha = 0.9;
+        this.blink.graphics.clear();
+
+        this.setBlinkColor(this.blink);
+
+
+        this.blink.graphics.drawCircle(x0 - 35 * Math.sin(angle_length.angle - (90).toRad()), y0 - 35 * Math.cos(angle_length.angle - (90).toRad()), 4);
+    },
     shot: function(angle, distance) {
+        if (this.charge_mode) { return false; }
         var bullet = new Bullet(angle, this.sprite.x, this.sprite.y, distance);
         animation.pushToRender(bullet);
-        animation.pushToRender(this);
+        this.show_shot = true;
+        this.charge_mode = new Date().getTime();
     },
-    render: function() {
+
+
+    renderShot: function() {
         var it = this;
         it.shot_animation(this.sprite, textures_sequence.shot, function(data) {
             if (data.finish) {
-                animation.removeFromRender(it);
+                it.show_shot = false;
                 it.sprite.image = textures_static.big_gun();
             }
-            //console.log(data.finish);
         });
+    },
+    render: function() {
+        var it = this;
+        if (it.show_shot) { it.renderShot(); }
+        if (it.angle_length) {
+            it.drawBlink(it.sprite.x, it.sprite.y, it.angle_length);
+        }
     }
 };
 
@@ -169,6 +220,6 @@ var gunManager = {
         var big_gun2 = new BigGun(WIDTH - 200, HEIGHT/2, 270, 'rgb(100, 255, 100)');
 
         new Slider(200, 70, big_gun1);
-        new Slider(WIDTH - 194, HEIGHT - 70, big_gun2);
+        new Slider(WIDTH - 205, HEIGHT - 70, big_gun2);
     }
 };

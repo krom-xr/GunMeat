@@ -209,7 +209,7 @@ Soldier.prototype = {
     },
     isFlagIntersect: function() {
         var len = utils.getLength({x: this.sprite.x, y: this.sprite.y}, {x: WIDTH/2, y: HEIGHT/2});
-        return len < 20;
+        return len < 50;
 
     },
     renderDeath: function() { this.sprite.image = textures_static.soldier_killed(); },

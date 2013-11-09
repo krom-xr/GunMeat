@@ -63,8 +63,8 @@ var animation = {
 
 
 $(document).ready(function() {
-    WIDTH = $(window).width()-10;
-    HEIGHT = $(window).height()-10;
+    WIDTH = $(window).width();
+    HEIGHT = $(window).height();
 
     var canvas = $("#main_canvas").get(0);
     var bgr = new createjs.Bitmap(textures_static.background());
