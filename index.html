@@ -34,7 +34,7 @@
         .player {
             position: fixed;
             left: 50%;
-            margin-left: -50px;
+            margin-left: -32px;
             bottom: 20px;
             width: 64px;
             height: 64px;
@@ -46,6 +46,16 @@
         .player.pause {
             background-image: url('img/player/pause.png');
         }
+        .preloader {
+            width: 200px;
+            height: 60px;
+            background: white;
+            position: fixed;
+            left: 50%;
+            margin-left: -100px;
+            text-align: center;
+            top: 200px;
+        }
     </style>
     
 </head>
@@ -55,11 +65,21 @@
         <audio></audio>
     </div>
 
+    <div id="preloader" class="preloader">
+        <br />
+        <progress></progress>
+    </div>
+    
     <canvas id="main_canvas" width='1000' height='800'></canvas>
 
     
     <div style="display: none">
         <audio src="audio/gun_rotate.mp3"></audio>
+        <audio src="audio/dead.wav"></audio>
+        <audio src="audio/explosion.wav"></audio>
+        <audio src="audio/run.wav"></audio>
+        <audio src="audio/shot.wav"></audio>
+        <audio src="audio/squeking_move.wav"></audio>
     </div>
 
 </body>
