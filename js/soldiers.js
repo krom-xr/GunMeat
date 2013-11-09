@@ -203,7 +203,14 @@ Soldier.prototype = {
         this.sprite.y = xy.y;
 
         if (this.isFlagIntersect()) {
-            alert(this.player + " win!!!");
+            if (confirm(this.player + " win!!! \nAre you want to play again?")) {
+                location.href = "";
+            } else {
+                alert('Thanks. See you later');
+                var gui = require('nw.gui');
+                var win = gui.Window.get();
+                win.close();
+            };
         }
 
 
