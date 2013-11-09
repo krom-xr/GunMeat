@@ -57,7 +57,7 @@ var Bullet = function(angle, x, y, distance) {
     this.x0 = x;
     this.y0 = y;
     this.start_time = new Date().getTime();
-    this.animation_once = _.throttle(animation.once, 50);
+    this.animation_once = _.throttle(animation.once, 20);
 };
 
 Bullet.prototype = {

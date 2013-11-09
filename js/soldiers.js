@@ -5,6 +5,7 @@ var Soldier = function(x, y, angle, player, trace_color) {
     it.type = 'soldier';
     it.unbrekable = true;
     it.player = player;
+    it.trace_color = trace_color;
 
     it.soldier_run = it.player === 'player1' ? textures_sequence.soldier_run1 : textures_sequence.soldier_run2;
 
@@ -156,6 +157,7 @@ Soldier.prototype = {
         this.is_dead = true;
         this.sprite.image = textures_static.soldier_killed(this.player);
         this.run_sound.pause();
+        this.run_sound.src = "";
         sounds.dead();
         soldierManager.killSoldier(this);
 
@@ -261,14 +263,14 @@ var soldierManager = {
         }, 60000);
 
         setTimeout(function() {
-            it.respawn(soldier.player);
+            it.respawn(soldier);
         }, 10000);
     },
-    respawn: function(player) {
+    respawn: function(soldier) {
         var x = 50, y = 50, angle = 90;
-        if (player === 'player2') {
+        if (soldier.player === 'player2') {
             x = WIDTH - x; y = HEIGHT - y, angle = 270;
         }
-        this.addSoldier(new Soldier(x, y, angle, player));
+        this.addSoldier(new Soldier(x, y, angle, soldier.player, soldier.trace_color));
     }
 };

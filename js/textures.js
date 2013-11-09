@@ -66,11 +66,16 @@ var sounds = {
     gun_rotate: function() {
         var run = document.createElement('audio');
         run.preload = true;
-        run.addEventListener('ended', function() {
-            this.currentTime = 0;
-            this.src = this.src;
-            this.play();
-        }, false);
+        run.loop = true;
+        $(run).on('ended', function() {
+            console.log('ended');
+        });
+        //run.addEventListener('ended', function() {
+            //console.log('ended');
+            //this.currentTime = 0;
+            //this.src = this.src;
+            //this.play();
+        //}, false);
 
         run.src = 'audio/gun_rotate.ogg';
         return run;
