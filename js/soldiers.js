@@ -7,6 +7,8 @@ var Soldier = function(x, y, angle, player, trace_color) {
     it.player = player;
     it.trace_color = trace_color;
 
+    it.init_coord = {x: x, y: y, angle: angle};
+
     it.soldier_run = it.player === 'player1' ? textures_sequence.soldier_run1 : textures_sequence.soldier_run2;
 
     var sprite = new createjs.Bitmap(textures_static.soldier(player));
@@ -267,10 +269,7 @@ var soldierManager = {
         }, 10000);
     },
     respawn: function(soldier) {
-        var x = 50, y = 50, angle = 90;
-        if (soldier.player === 'player2') {
-            x = WIDTH - x; y = HEIGHT - y, angle = 270;
-        }
+        var x = soldier.init_coord.x, y = soldier.init_coord.y, angle = soldier.init_coord.angle;
         this.addSoldier(new Soldier(x, y, angle, soldier.player, soldier.trace_color));
     }
 };
