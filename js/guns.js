@@ -33,11 +33,11 @@ var BigGun = function(x, y, angle, sight_color) {
     //Пушка
     document.addEventListener('PointerDown', function(e) {
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: it.sprite.x, y: it.sprite.y});
-        if (is_near < 30) {
+        if (is_near < 30 && !it.pointer_moveId) {
             it.pointer_moveId = e.pointerId;
             it.move_mode = true;
             sprite.image = textures_static.big_gun_active();
-        } else if (30 < is_near && is_near < 100) {
+        } else if (30 < is_near && is_near < 100 || is_near < 30 && it.pointer_moveId) {
             it.pointerId = e.pointerId;
             sprite.image = textures_static.big_gun_active();
         }
@@ -239,7 +239,7 @@ var gunManager = {
         var big_gun1 = new BigGun(200, HEIGHT/2, 90, 'rgb(255, 255, 100)');
         var big_gun2 = new BigGun(WIDTH - 200, HEIGHT/2, 270, 'rgb(100, 255, 100)');
 
-        new Slider(200, 70, big_gun1);
-        new Slider(WIDTH - 205, HEIGHT - 70, big_gun2);
+        //new Slider(200, 70, big_gun1);
+        //new Slider(WIDTH - 205, HEIGHT - 70, big_gun2);
     }
 };
