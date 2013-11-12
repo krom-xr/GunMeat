@@ -490,14 +490,6 @@ $(document).ready(function() {
     }, 2000);
 
     //TODO это вернуть потом
-    //setTimeout(function() {
-        //flag.init();
-        //gunManager.init();
-        //soldierManager.init();
-        //stoneManager.init();
-
-        //$('#preloader').hide('slow');
-    //}, 8000);
     setTimeout(function() {
         flag.init();
         gunManager.init();
@@ -505,9 +497,18 @@ $(document).ready(function() {
         stoneManager.init();
 
         $('#preloader').hide('slow');
-    }, 80);
+    }, 8000);
+    
 
 });
-//$(document).on('contextmenu', function(e) { e.preventDefault(); e.stopPropagation(); });
-
+$(document).on('contextmenu', function(e) { e.preventDefault(); e.stopPropagation(); });
+$(document).on('keyup', function(e) {
+    if (e.keyCode === 27) {
+        if (confirm('are you want to quit?')) {
+            var gui = require('nw.gui');
+            var win = gui.Window.get();
+            win.close();    
+        }  
+    }
+})
 
