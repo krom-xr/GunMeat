@@ -33,19 +33,18 @@ var BigGun = function(x, y, angle, sight_color) {
     //Пушка
     document.addEventListener('PointerDown', function(e) {
         var is_near = utils.getLength({x: e.clientX, y: e.clientY}, {x: it.sprite.x, y: it.sprite.y});
-        if (is_near < 100) {
-            if (it.pointerId && it.pointerId !== e.pointerId) {
-                it.pointer_moveId = e.pointerId;
-                it.move_mode = true;
-            } else {
-                it.pointerId = e.pointerId;
-                sprite.image = textures_static.big_gun_active();
-            }
+        if (is_near < 30) {
+            it.pointer_moveId = e.pointerId;
+            it.move_mode = true;
+            sprite.image = textures_static.big_gun_active();
+        } else if (30 < is_near && is_near < 100) {
+            it.pointerId = e.pointerId;
+            sprite.image = textures_static.big_gun_active();
         }
 
     });
     document.addEventListener('PointerMove', function(e) {
-        if (!it.pointerId) { return false; }
+        //if (!it.pointerId) { return false; }
 
         if (it.pointer_moveId === e.pointerId) {
             //if (e.pointerId !== it.pointer_moveId) { return false; }
@@ -54,7 +53,7 @@ var BigGun = function(x, y, angle, sight_color) {
             it.sprite.y = y;
             it.moveGun();
 
-        } else {
+        } else if (it.pointerId === e.pointerId) {
             gun_rotate.play();
             var angle_length = utils.getAngleAndLength({x: it.sprite.x, y: it.sprite.y}, {x: e.clientX, y: e.clientY});
             sprite.rotation = - angle_length.angle.toGrad();
@@ -70,7 +69,7 @@ var BigGun = function(x, y, angle, sight_color) {
         }
         //if (it.move_mode) { return false; }
         if (it.pointerId === e.pointerId) {
-            it.pointerId = false; //TODO вернуть на место
+            it.pointerId = false;
 
             var angle_length = utils.getAngleAndLength({x: it.sprite.x, y: it.sprite.y}, {x: e.clientX, y: e.clientY});
             var xy = it.getIntersectedXY(it.sprite.x, it.sprite.y, angle_length);
