@@ -1,5 +1,5 @@
 /*global createjs, PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT, container */
-/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, soldierManager, gunManager, sounds */
+/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, soldierManager, gunManager, sounds, require */
 var helper = {
     _stones_map_ctx: false,
     kill: function(ob) {
@@ -504,8 +504,8 @@ $(document).on('keyup', function(e) {
         if (confirm('are you want to quit?')) {
             var gui = require('nw.gui');
             var win = gui.Window.get();
-            win.close();    
-        }  
+            win.close();
+        }
     }
-})
+});
 
