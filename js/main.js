@@ -506,6 +506,10 @@ $(document).on('keyup', function(e) {
             var win = gui.Window.get();
             win.close();
         }
+    } else if (e.keyCode === 13) {
+        if (confirm('are you want to replay?')) {
+            location.href = "";
+        }
     }
 });
 
