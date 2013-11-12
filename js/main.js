@@ -496,8 +496,7 @@ $(document).ready(function() {
         stoneManager.init();
 
         $('#preloader').hide('slow');
-    //}, 8000); //TODO вернуть на родину
-    }, 80);
+    }, 8000); //TODO вернуть на родину
 });
 $(document).on('contextmenu', function(e) { e.preventDefault(); e.stopPropagation(); });
 $(document).on('keyup', function(e) {

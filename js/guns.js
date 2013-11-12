@@ -66,9 +66,8 @@ var BigGun = function(x, y, angle, sight_color) {
         if (it.pointer_moveId === e.pointerId) {
             it.pointer_moveId = false;
             it.move_mode = false;
-            console.log('dadaf');
+            sprite.image = textures_static.big_gun();
         } else if (it.pointerId === e.pointerId) {
-            console.log('pointerId')
             it.pointerId = false;
 
             var angle_length = utils.getAngleAndLength({x: it.sprite.x, y: it.sprite.y}, {x: e.clientX, y: e.clientY});

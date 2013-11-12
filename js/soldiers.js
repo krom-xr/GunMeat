@@ -1,5 +1,5 @@
 /*global createjs, PIXI, requestAnimFrame, _, utils, animation, stage, textures_static, BULLET_SPEED, textures_sequence, renderer, BULLET_DISTANCE_COEFFICIENT, container */
-/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, helper, stoneManager, sounds  */
+/*global BULLET_DESTROY_RADIUS, SOLDIER_SPEED, HEIGHT, WIDTH, helper, stoneManager, sounds, require */
 var Soldier = function(x, y, angle, player, trace_color) {
     var it = this;
     it.type = 'soldier';
@@ -210,7 +210,7 @@ Soldier.prototype = {
                 var gui = require('nw.gui');
                 var win = gui.Window.get();
                 win.close();
-            };
+            }
         }
 
 
@@ -221,7 +221,7 @@ Soldier.prototype = {
         return len < 50;
 
     },
-    renderDeath: function() { this.sprite.image = textures_static.soldier_killed(); },
+    renderDeath: function() { this.sprite.image = textures_static.soldier_killed(this.player); },
     renderStop: function() { this.sprite.image = textures_static.soldier_unbrekable(); },
     render: function() {
         if (this.is_dead) {
