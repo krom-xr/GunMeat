@@ -78,7 +78,6 @@ var BigGun = function(x, y, angle, sight_color) {
             angle_length = utils.getAngleAndLength({x: it.sprite.x, y: it.sprite.y}, {x: xy.x, y: xy.y});
 
             gun_rotate.pause();
-            sounds.gunShot();
             it.shot(angle_length.angle, angle_length.length - 3);
             sprite.image = textures_static.big_gun();
         }
@@ -154,10 +153,12 @@ BigGun.prototype = {
     },
     shot: function(angle, distance) {
         if (this.charge_mode) { return false; }
+        sounds.gunShot();
         var bullet = new Bullet(angle, this.sprite.x, this.sprite.y, distance);
         animation.pushToRender(bullet);
-        this.show_shot = true;
+        this.show_shot = !this.charge_mode;
         this.charge_mode = new Date().getTime();
+
     },
 
 

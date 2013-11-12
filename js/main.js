@@ -448,16 +448,16 @@ var player = {
             }
         }, false);
 
-        this.$id.click(function() {
-            var $this = $(this);
-            if ($this.hasClass('pause')) {
-                $this.removeClass('pause');
-                it.audio.pause();
-            } else {
-                $this.addClass('pause');
-                it.audio.play();
-            }
-        });
+        //this.$id.click(function() {
+            //var $this = $(this);
+            //if ($this.hasClass('pause')) {
+                //$this.removeClass('pause');
+                //it.audio.pause();
+            //} else {
+                //$this.addClass('pause');
+                //it.audio.play();
+            //}
+        //});
 
     },
     playlist: [
@@ -490,14 +490,6 @@ $(document).ready(function() {
     }, 2000);
 
     //TODO это вернуть потом
-    //setTimeout(function() {
-        //flag.init();
-        //gunManager.init();
-        //soldierManager.init();
-        //stoneManager.init();
-
-        //$('#preloader').hide('slow');
-    //}, 8000);
     setTimeout(function() {
         flag.init();
         gunManager.init();
@@ -505,7 +497,15 @@ $(document).ready(function() {
         stoneManager.init();
 
         $('#preloader').hide('slow');
-    }, 80);
+    }, 8000);
+    //setTimeout(function() {
+        //flag.init();
+        //gunManager.init();
+        //soldierManager.init();
+        //stoneManager.init();
+
+        //$('#preloader').hide('slow');
+    //}, 80);
 
 });
 //$(document).on('contextmenu', function(e) { e.preventDefault(); e.stopPropagation(); });
