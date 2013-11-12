@@ -37,7 +37,7 @@ var BigGun = function(x, y, angle, sight_color) {
             it.pointer_moveId = e.pointerId;
             it.move_mode = true;
             sprite.image = textures_static.big_gun_active();
-        } else if (30 < is_near && is_near < 100 || is_near < 30 && it.pointer_moveId) {
+        } else if (30 < is_near && is_near < 100 || is_near < 30 && it.pointer_moveId && it.pointer_moveId !== e.pointerId) {
             it.pointerId = e.pointerId;
             sprite.image = textures_static.big_gun_active();
         }
@@ -66,9 +66,9 @@ var BigGun = function(x, y, angle, sight_color) {
         if (it.pointer_moveId === e.pointerId) {
             it.pointer_moveId = false;
             it.move_mode = false;
-        }
-        //if (it.move_mode) { return false; }
-        if (it.pointerId === e.pointerId) {
+            console.log('dadaf');
+        } else if (it.pointerId === e.pointerId) {
+            console.log('pointerId')
             it.pointerId = false;
 
             var angle_length = utils.getAngleAndLength({x: it.sprite.x, y: it.sprite.y}, {x: e.clientX, y: e.clientY});
